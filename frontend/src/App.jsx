@@ -1,12 +1,15 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './App.css';
+import GetStarted from './components/GetStarted/GetStarted';
 
 const App = () => {
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline text-red-500 bg-green-300 p-4">
-        Hello world!
-      </h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<GetStarted />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
 
