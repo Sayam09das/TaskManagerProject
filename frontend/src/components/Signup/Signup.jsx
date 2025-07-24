@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Eye, EyeOff, Sun, Moon, UserPlus, User, Mail, Lock } from 'lucide-react';
 
 const Signup = () => {
@@ -81,8 +82,7 @@ const Signup = () => {
             setValidationErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
-
-    const handleSignup = (e) => {
+    const handleSignup = async (e) => {
         e.preventDefault();
         const errors = {};
 
@@ -136,12 +136,34 @@ const Signup = () => {
             return;
         }
 
-        showToast('Account created successfully! Welcome aboard!', 'success');
-        // Reset form after successful signup
-        setTimeout(() => {
-            setFormData({ fullName: '', email: '', password: '', confirmPassword: '' });
-        }, 2000);
+        // ✅ BACKEND REGISTER API CALL HERE
+        try {
+            const res = await axios.post('http://localhost:3000/auth/register', {
+                name: formData.fullName,
+                email: formData.email,
+                password: formData.password
+            });
+
+            if (res.status === 201 || res.status === 200) {
+                showToast('Account created successfully! Welcome aboard!', 'success');
+                setTimeout(() => {
+                    setFormData({ fullName: '', email: '', password: '', confirmPassword: '' });
+                    window.location.href = '/schedulo'; // ✅ redirect added
+                }, 2000);
+            } else {
+                showToast('Unexpected response. Please try again.', 'error');
+            }
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+                showToast(error.response.data.message, 'error');
+            } else {
+                showToast('Something went wrong. Please try again later.', 'error');
+            }
+        }
     };
+
+
+
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
     const backgroundClass = isDark
@@ -156,8 +178,8 @@ const Signup = () => {
             {/* Toast Notification */}
             {toast.show && (
                 <div className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-xl border-2 transition-all duration-300 max-w-md text-center ${toast.type === 'error'
-                        ? 'bg-red-900/80 border-red-400/50 text-red-100'
-                        : 'bg-green-900/80 border-green-400/50 text-green-100'
+                    ? 'bg-red-900/80 border-red-400/50 text-red-100'
+                    : 'bg-green-900/80 border-green-400/50 text-green-100'
                     }`}>
                     {toast.message}
                 </div>
