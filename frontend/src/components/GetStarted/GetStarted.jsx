@@ -156,7 +156,7 @@ const GetStarted = () => {
                     transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }}
                 >
                     {/* Login Button */}
-                    <Link to="/login">
+                    <Link to="/auth/login">
                         <motion.button
                             className={`w-60 h-14 group px-12 py-5 rounded-2xl font-bold text-xl transition-all duration-300 shadow-xl ${isDark
                                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
