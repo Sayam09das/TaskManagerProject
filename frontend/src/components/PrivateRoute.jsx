@@ -9,8 +9,9 @@ const PrivateRoute = ({ children }) => {
     const verifyAuth = async () => {
       try {
         const res = await axios.get('http://localhost:3000/schedulo', {
-          withCredentials: true,
+          withCredentials: true // ✅ This sends the cookie
         });
+
 
         if (res.status === 200) {
           setIsAuthenticated(true);

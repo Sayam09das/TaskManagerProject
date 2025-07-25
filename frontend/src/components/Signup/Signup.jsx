@@ -115,19 +115,41 @@ const Signup = () => {
             const res = await fetch('http://localhost:3000/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include', // ✅ This is important!
                 body: JSON.stringify({
-                    name: formData.fullName,  // 👈 must match backend field
+                    name: formData.fullName,
                     email: formData.email,
                     password: formData.password
                 })
             });
 
+
             const data = await res.json();
             if (res.ok) {
-                localStorage.setItem('authToken', data.token);
-                showToast('Signup successful! Redirecting...', 'success');
-                setTimeout(() => (window.location.href = '/schedulo'), 1500);
-            } else {
+                showToast('Signup successful! Logging in...', 'success');
+
+                // Immediately log in the user after signup
+                const loginRes = await fetch('http://localhost:3000/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: formData.email,
+                        password: formData.password
+                    })
+                });
+
+                const loginData = await loginRes.json();
+
+                if (loginRes.ok) {
+                    showToast('Login successful! Redirecting...', 'success');
+                    setTimeout(() => (window.location.href = '/schedulo'), 1500);
+                } else {
+                    showToast(loginData.message || 'Login after signup failed', 'error');
+                }
+            }
+
+            else {
                 showToast(data.message || 'Signup failed', 'error');
             }
         } catch (err) {
