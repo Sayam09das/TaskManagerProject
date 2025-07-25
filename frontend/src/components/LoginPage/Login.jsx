@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Sun, Moon, LogIn } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
+    const navigate = useNavigate();
     const [isDark, setIsDark] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [email, setEmail] = useState('');
@@ -24,30 +26,32 @@ const Login = () => {
         }, 3000);
     };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
-        // Strict email validation
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|org|net|in)$/;
+        try {
+            const res = await fetch('http://localhost:3000/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+                credentials: 'include',
+            });
 
-        // Strict password validation
-        const passwordRegex =
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{4,12}$/;
+            const data = await res.json();
 
-        if (!emailRegex.test(email)) {
-            showToast('Please enter a valid email (e.g., user@gmail.com)', 'error');
-            return;
+            if (res.ok) {
+                localStorage.setItem('authToken', data.token);
+                showToast('Login successful!', 'success');
+                navigate('/schedulo');
+            } else {
+                showToast(data.message || 'Login failed', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Something went wrong!', 'error');
         }
-
-        if (!passwordRegex.test(password)) {
-            showToast(
-                'Password must be 4-12 characters, include uppercase, lowercase, number, and special character',
-                'error'
-            );
-            return;
-        }
-
-        showToast('Login successful!', 'success');
     };
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
@@ -93,8 +97,7 @@ const Login = () => {
                     className={`w-full max-w-md p-10 rounded-3xl shadow-2xl backdrop-blur-md border-2 transition-all duration-600 transform ${isDark
                             ? 'bg-purple-900/20 border-purple-400/30 text-white'
                             : 'bg-white/40 border-blue-400/20 text-gray-900'
-                        }`}
-                    style={{ animation: 'fadeInUp 0.6s ease-out' }}
+                        } animate-[fadeInUp_0.6s_ease-out]`}
                 >
                     <h2 className="text-4xl font-extrabold mb-6 text-center">Login</h2>
 
@@ -133,13 +136,12 @@ const Login = () => {
 
                     {/* Forgot Password */}
                     <div className="text-sm mb-6 text-right">
-                        <a
-                            href="#"
-                            className={`font-medium transition-colors ${isDark ? 'text-purple-300 hover:text-purple-100' : 'text-blue-600 hover:text-blue-800'
+                        <span
+                            className={`font-medium cursor-not-allowed opacity-60 ${isDark ? 'text-purple-300' : 'text-blue-600'
                                 }`}
                         >
                             Forgot password?
-                        </a>
+                        </span>
                     </div>
 
                     {/* Submit Button */}
@@ -156,42 +158,42 @@ const Login = () => {
                     {/* Sign Up */}
                     <p className={`mt-6 text-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                         Don’t have an account?{' '}
-                        <a
-                            href="/auth/register"
-                            className={`font-medium underline transition-colors ${isDark ? 'text-purple-300 hover:text-purple-100' : 'text-blue-600 hover:text-blue-800'
+                        <Link
+                            to="/auth/register"
+                            className={`font-medium transition-colors ${isDark ? 'text-purple-300 hover:text-purple-100' : 'text-blue-600 hover:text-blue-800'
                                 }`}
                         >
                             Sign Up
-                        </a>
+                        </Link>
                     </p>
                 </form>
             </div>
 
-            {/* CSS Animation */}
-            <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(50px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .hover\\:scale-103:hover {
-          transform: scale(1.03);
-        }
-        .active\\:scale-98:active {
-          transform: scale(0.98);
-        }
-        .hover\\:scale-105:hover {
-          transform: scale(1.05);
-        }
-        .active\\:scale-95:active {
-          transform: scale(0.95);
-        }
-      `}</style>
+            {/* Keyframe Animation */}
+            <style>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(50px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .hover\\:scale-103:hover {
+                    transform: scale(1.03);
+                }
+                .active\\:scale-98:active {
+                    transform: scale(0.98);
+                }
+                .hover\\:scale-105:hover {
+                    transform: scale(1.05);
+                }
+                .active\\:scale-95:active {
+                    transform: scale(0.95);
+                }
+            `}</style>
         </div>
     );
 };

@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 import {
     Plus,
     Search,
@@ -22,6 +25,7 @@ import {
 
 const TaskManager = () => {
     const [isDark, setIsDark] = useState(false);
+    const navigate = useNavigate();
     const [tasks, setTasks] = useState([
         {
             id: 1,
@@ -65,6 +69,7 @@ const TaskManager = () => {
     const [showAddTask, setShowAddTask] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     // User data (simulated)
     const user = {
@@ -134,6 +139,25 @@ const TaskManager = () => {
         updateTask(id, { status: newStatus });
     };
 
+    // Logout functionality with axios
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        try {
+            await axios.post('http://localhost:3000/auth/logout', {}, {
+                withCredentials: true,
+            });
+            showToast('Logged out successfully!', 'success');
+            setTimeout(() => {
+                navigate('/'); // redirect to GetStarted or Login
+            }, 1000);
+        } catch (error) {
+            console.error('Logout failed:', error);
+            showToast('Logout failed. Please try again.', 'error');
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
+
     // Filter tasks
     const filteredTasks = tasks.filter(task => {
         const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,18 +211,13 @@ const TaskManager = () => {
         }
     };
 
-    const handleLogout = () => {
-        showToast('Logged out successfully!', 'success');
-        // In a real app, this would redirect to login page
-    };
-
     return (
         <div className={`min-h-screen transition-colors duration-500 ${backgroundClass}`}>
             {/* Toast Notification */}
             {toast.show && (
                 <div className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-xl border-2 transition-all duration-300 ${toast.type === 'error'
-                        ? 'bg-red-900/80 border-red-400/50 text-red-100'
-                        : 'bg-green-900/80 border-green-400/50 text-green-100'
+                    ? 'bg-red-900/80 border-red-400/50 text-red-100'
+                    : 'bg-green-900/80 border-green-400/50 text-green-100'
                     }`}>
                     {toast.message}
                 </div>
@@ -243,10 +262,15 @@ const TaskManager = () => {
                             {/* Logout Button */}
                             <button
                                 onClick={handleLogout}
-                                className={`p-2 rounded-xl transition-all duration-300 hover:scale-105 ${isDark ? 'bg-red-900/50 text-red-400 hover:bg-red-900/70' : 'bg-red-100 text-red-600 hover:bg-red-200'
+                                disabled={isLoggingOut}
+                                className={`p-2 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${isDark ? 'bg-red-900/50 text-red-400 hover:bg-red-900/70' : 'bg-red-100 text-red-600 hover:bg-red-200'
                                     }`}
                             >
-                                <LogOut className="w-5 h-5" />
+                                {isLoggingOut ? (
+                                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <LogOut className="w-5 h-5" />
+                                )}
                             </button>
                         </div>
                     </div>
@@ -491,8 +515,8 @@ const TaskManager = () => {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
                                                 <h3 className={`text-lg font-semibold ${task.status === 'completed'
-                                                        ? isDark ? 'text-gray-500 line-through' : 'text-gray-400 line-through'
-                                                        : isDark ? 'text-white' : 'text-gray-900'
+                                                    ? isDark ? 'text-gray-500 line-through' : 'text-gray-400 line-through'
+                                                    : isDark ? 'text-white' : 'text-gray-900'
                                                     }`}>
                                                     {task.title}
                                                 </h3>
@@ -503,8 +527,8 @@ const TaskManager = () => {
 
                                             {task.description && (
                                                 <p className={`text-sm mb-3 ${task.status === 'completed'
-                                                        ? isDark ? 'text-gray-600' : 'text-gray-500'
-                                                        : isDark ? 'text-gray-300' : 'text-gray-600'
+                                                    ? isDark ? 'text-gray-600' : 'text-gray-500'
+                                                    : isDark ? 'text-gray-300' : 'text-gray-600'
                                                     }`}>
                                                     {task.description}
                                                 </p>

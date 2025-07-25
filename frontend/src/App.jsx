@@ -4,15 +4,32 @@ import './App.css';
 import GetStarted from './components/GetStarted/GetStarted';
 import LoginPage from './components/LoginPage/Login';
 import Signup from './components/Signup/Signup';
-import Schedulo from './components/TaskMange/TaskManager'
+import Schedulo from './components/TaskMange/TaskManager';
+import PrivateRoute from './components/PrivateRoute';
+import PublicRouteWithRedirect from './components/PublicRouteWithRedirect';
+
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<GetStarted />} />
-        <Route path='/auth/login' element={<LoginPage />} />
-        <Route path='/auth/register' element={<Signup />} />
-        <Route path='/schedulo' element={<Schedulo />} />
+        <Route
+          path="/"
+          element={
+            <PublicRouteWithRedirect>
+              <GetStarted />
+            </PublicRouteWithRedirect>
+          }
+        />
+        <Route path="/auth/login" element={<LoginPage />} />
+        <Route path="/auth/register" element={<Signup />} />
+        <Route
+          path="/schedulo"
+          element={
+            <PrivateRoute>
+              <Schedulo />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

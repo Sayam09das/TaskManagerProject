@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Eye, EyeOff, Sun, Moon, UserPlus, User, Mail, Lock } from 'lucide-react';
+
+// Moved outside component to prevent re-initialization
+const proxyDomains = [
+    'tempmail.org', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
+    'temp-mail.org', 'throwaway.email', 'fakeinbox.com', 'maildrop.cc',
+    'yopmail.com', 'sharklasers.com', 'tempail.com', 'dispostable.com',
+    'emkei.cz', 'emailondeck.com', 'getnada.com', 'tempmailo.com',
+    'mohmal.com', 'mintemail.com', 'dropmail.me', 'burnermail.io'
+];
 
 const Signup = () => {
     const [isDark, setIsDark] = useState(false);
@@ -16,15 +24,6 @@ const Signup = () => {
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
     const [validationErrors, setValidationErrors] = useState({});
 
-    // Proxy email domains list
-    const proxyDomains = [
-        'tempmail.org', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
-        'temp-mail.org', 'throwaway.email', 'fakeinbox.com', 'maildrop.cc',
-        'yopmail.com', 'sharklasers.com', 'tempail.com', 'dispostable.com',
-        'emkei.cz', 'emailondeck.com', 'getnada.com', 'tempmailo.com',
-        'mohmal.com', 'mintemail.com', 'dropmail.me', 'burnermail.io'
-    ];
-
     useEffect(() => {
         const handleMouseMove = (e) => {
             setMousePosition({ x: e.clientX, y: e.clientY });
@@ -33,7 +32,6 @@ const Signup = () => {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
-    // Toast functionality
     const showToast = (message, type) => {
         setToast({ show: true, message, type });
         setTimeout(() => {
@@ -41,90 +39,67 @@ const Signup = () => {
         }, 4000);
     };
 
-    // Validation functions
-    const validateFullName = (name) => {
-        const nameRegex = /^[a-zA-Z\s]{2,50}$/;
-        return nameRegex.test(name.trim());
-    };
+    const validateFullName = (name) => /^[a-zA-Z\s]{2,50}$/.test(name.trim());
 
     const validateEmail = (email) => {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) return false;
-
-        // Check for proxy/temporary email domains
+        const emailRegex = /^[\w.%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const domain = email.split('@')[1]?.toLowerCase();
-        return !proxyDomains.includes(domain);
+        return emailRegex.test(email) && !proxyDomains.includes(domain);
     };
 
     const validatePassword = (password) => {
-        const minLength = password.length >= 4;
-        const maxLength = password.length <= 12;
-        const hasUppercase = /[A-Z]/.test(password);
-        const hasNumber = /\d/.test(password);
-        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-
-        return {
-            isValid: minLength && maxLength && hasUppercase && hasNumber && hasSpecialChar,
-            minLength,
-            maxLength,
-            hasUppercase,
-            hasNumber,
-            hasSpecialChar
+        const checks = {
+            minLength: password.length >= 4,
+            maxLength: password.length <= 12,
+            hasUppercase: /[A-Z]/.test(password),
+            hasNumber: /\d/.test(password),
+            hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
         };
+        return { ...checks, isValid: Object.values(checks).every(Boolean) };
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-
-        // Clear validation error when user starts typing
         if (validationErrors[name]) {
             setValidationErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
+
     const handleSignup = async (e) => {
         e.preventDefault();
         const errors = {};
 
-        // Full Name validation
         if (!formData.fullName.trim()) {
             errors.fullName = 'Full name is required';
         } else if (!validateFullName(formData.fullName)) {
-            errors.fullName = 'Full name must be 2-50 characters and contain only letters';
+            errors.fullName = 'Use 2–50 characters with letters and spaces only';
         }
 
-        // Email validation
         if (!formData.email.trim()) {
             errors.email = 'Email is required';
         } else if (!validateEmail(formData.email)) {
             const domain = formData.email.split('@')[1]?.toLowerCase();
-            if (proxyDomains.includes(domain)) {
-                errors.email = 'Temporary/proxy email addresses are not allowed';
-            } else {
-                errors.email = 'Please enter a valid email address';
-            }
+            errors.email = proxyDomains.includes(domain)
+                ? 'Temporary/proxy emails are not allowed'
+                : 'Please enter a valid email address';
         }
 
-        // Password validation
+        const pwdCheck = validatePassword(formData.password);
         if (!formData.password) {
             errors.password = 'Password is required';
-        } else {
-            const passwordCheck = validatePassword(formData.password);
-            if (!passwordCheck.isValid) {
-                let errorMsg = 'Password must contain: ';
-                const missing = [];
-                if (!passwordCheck.minLength) missing.push('at least 4 characters');
-                if (!passwordCheck.maxLength) missing.push('at most 12 characters');
-                if (!passwordCheck.hasUppercase) missing.push('1 uppercase letter');
-                if (!passwordCheck.hasNumber) missing.push('1 number');
-                if (!passwordCheck.hasSpecialChar) missing.push('1 special character');
-                errors.password = errorMsg + missing.join(', ');
-            }
+        } else if (!pwdCheck.isValid) {
+            const issues = [];
+            if (!pwdCheck.minLength) issues.push('4+ chars');
+            if (!pwdCheck.maxLength) issues.push('≤12 chars');
+            if (!pwdCheck.hasUppercase) issues.push('1 uppercase letter');
+            if (!pwdCheck.hasNumber) issues.push('1 number');
+            if (!pwdCheck.hasSpecialChar) issues.push('1 special character');
+            errors.password = `Password must include: ${issues.join(', ')}`;
         }
 
-        // Confirm Password validation
         if (!formData.confirmPassword) {
-            errors.confirmPassword = 'Please confirm your password';
+            errors.confirmPassword = 'Confirm your password';
         } else if (formData.password !== formData.confirmPassword) {
             errors.confirmPassword = 'Passwords do not match';
         }
@@ -132,72 +107,68 @@ const Signup = () => {
         setValidationErrors(errors);
 
         if (Object.keys(errors).length > 0) {
-            showToast('Please fix the errors below', 'error');
+            showToast('Fix the highlighted errors', 'error');
             return;
         }
 
-        // ✅ BACKEND REGISTER API CALL HERE
         try {
-            const res = await axios.post('http://localhost:3000/auth/register', {
-                name: formData.fullName,
-                email: formData.email,
-                password: formData.password
+            const res = await fetch('http://localhost:3000/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.fullName,  // 👈 must match backend field
+                    email: formData.email,
+                    password: formData.password
+                })
             });
 
-            if (res.status === 201 || res.status === 200) {
-                showToast('Account created successfully! Welcome aboard!', 'success');
-                setTimeout(() => {
-                    setFormData({ fullName: '', email: '', password: '', confirmPassword: '' });
-                    window.location.href = '/schedulo'; // ✅ redirect added
-                }, 2000);
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('authToken', data.token);
+                showToast('Signup successful! Redirecting...', 'success');
+                setTimeout(() => (window.location.href = '/schedulo'), 1500);
             } else {
-                showToast('Unexpected response. Please try again.', 'error');
+                showToast(data.message || 'Signup failed', 'error');
             }
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-                showToast(error.response.data.message, 'error');
-            } else {
-                showToast('Something went wrong. Please try again later.', 'error');
-            }
+        } catch (err) {
+            console.error(err);
+            showToast('Server error. Try again later.', 'error');
         }
     };
-
-
-
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
     const backgroundClass = isDark
         ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950'
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50';
 
-    const inputClass = (fieldName) => `w-full p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white placeholder-gray-400' : 'bg-white/70 text-gray-900 placeholder-gray-500'
-        } ${validationErrors[fieldName] ? 'border-2 border-red-500' : ''}`;
+    const inputClass = (field) =>
+        `w-full p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white placeholder-gray-400' : 'bg-white/70 text-gray-900 placeholder-gray-500'
+        } ${validationErrors[field] ? 'border-2 border-red-500' : ''}`;
 
     return (
         <div className={`min-h-screen transition-colors duration-500 relative overflow-hidden ${backgroundClass}`}>
-            {/* Toast Notification */}
+            {/* Toast */}
             {toast.show && (
-                <div className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-xl border-2 transition-all duration-300 max-w-md text-center ${toast.type === 'error'
-                    ? 'bg-red-900/80 border-red-400/50 text-red-100'
-                    : 'bg-green-900/80 border-green-400/50 text-green-100'
-                    }`}>
+                <div
+                    className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-xl border-2 max-w-md text-center ${toast.type === 'error'
+                        ? 'bg-red-900/80 border-red-400/50 text-red-100'
+                        : 'bg-green-900/80 border-green-400/50 text-green-100'
+                        }`}
+                >
                     {toast.message}
                 </div>
             )}
 
-            {/* Glowing Orb */}
+            {/* Orb */}
             <div
-                className={`fixed w-64 h-64 rounded-full pointer-events-none z-0 blur-3xl opacity-20 transition-all duration-500 ease-out ${orbColor}`}
-                style={{
-                    left: mousePosition.x - 128,
-                    top: mousePosition.y - 128,
-                }}
+                className={`fixed w-64 h-64 rounded-full pointer-events-none z-0 blur-3xl opacity-20 ${orbColor}`}
+                style={{ left: mousePosition.x - 128, top: mousePosition.y - 128 }}
             />
 
             {/* Dark Mode Toggle */}
             <button
                 onClick={() => setIsDark(!isDark)}
-                className={`fixed top-6 right-6 z-50 p-4 rounded-2xl backdrop-blur-xl border-2 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 ${isDark
+                className={`fixed top-6 right-6 z-50 p-4 rounded-2xl backdrop-blur-xl border-2 shadow-xl hover:scale-105 active:scale-95 transition-all ${isDark
                     ? 'bg-purple-900/50 border-purple-400/30 text-yellow-400 hover:bg-purple-800/60'
                     : 'bg-blue-900/10 border-blue-400/30 text-orange-500 hover:bg-blue-800/20'
                     }`}
@@ -208,139 +179,93 @@ const Signup = () => {
             {/* Signup Form */}
             <div className="relative z-10 flex items-center justify-center min-h-screen py-8">
                 <div
-                    className={`w-full max-w-md p-8 rounded-3xl shadow-2xl backdrop-blur-md border-2 transform transition-all duration-600 ${isDark
+                    className={`w-full max-w-md p-8 rounded-3xl shadow-2xl backdrop-blur-md border-2 animate-fadeInUp ${isDark
                         ? 'bg-purple-900/20 border-purple-400/30 text-white'
                         : 'bg-white/40 border-blue-400/20 text-gray-900'
                         }`}
-                    style={{
-                        animation: 'fadeInUp 0.6s ease-out'
-                    }}
                 >
+                    {/* Heading */}
                     <h2 className="text-4xl font-extrabold mb-6 text-center">Sign Up</h2>
                     <p className={`text-center mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                         Create your account to get started
                     </p>
 
-                    {/* Full Name Field */}
-                    <div className="mb-4">
-                        <label className="block mb-2 font-semibold flex items-center gap-2">
-                            <User className="w-4 h-4" />
-                            Full Name
-                        </label>
-                        <input
-                            type="text"
-                            name="fullName"
-                            value={formData.fullName}
-                            onChange={handleInputChange}
-                            className={inputClass('fullName')}
-                            placeholder="Enter your full name"
-                        />
-                        {validationErrors.fullName && (
-                            <p className="text-red-400 text-sm mt-1">{validationErrors.fullName}</p>
-                        )}
-                    </div>
+                    {/* Fields */}
+                    {[
+                        { name: 'fullName', label: 'Full Name', icon: <User className="w-4 h-4" />, type: 'text' },
+                        { name: 'email', label: 'Email Address', icon: <Mail className="w-4 h-4" />, type: 'email' }
+                    ].map(({ name, label, icon, type }) => (
+                        <div className="mb-4" key={name}>
+                            <label className="block mb-2 font-semibold flex items-center gap-2">
+                                {icon}
+                                {label}
+                            </label>
+                            <input
+                                type={type}
+                                name={name}
+                                value={formData[name]}
+                                onChange={handleInputChange}
+                                className={inputClass(name)}
+                                placeholder={`Enter your ${label.toLowerCase()}`}
+                            />
+                            {validationErrors[name] && <p className="text-red-400 text-sm mt-1">{validationErrors[name]}</p>}
+                        </div>
+                    ))}
 
-                    {/* Email Field */}
-                    <div className="mb-4">
-                        <label className="block mb-2 font-semibold flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            Email Address
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className={inputClass('email')}
-                            placeholder="Enter your email"
-                        />
-                        {validationErrors.email && (
-                            <p className="text-red-400 text-sm mt-1">{validationErrors.email}</p>
-                        )}
-                    </div>
+                    {/* Password */}
+                    {[
+                        { name: 'password', label: 'Password', value: showPassword, toggle: setShowPassword },
+                        { name: 'confirmPassword', label: 'Confirm Password', value: showConfirmPassword, toggle: setShowConfirmPassword }
+                    ].map(({ name, label, value, toggle }) => (
+                        <div className="mb-4 relative" key={name}>
+                            <label className="block mb-2 font-semibold flex items-center gap-2">
+                                <Lock className="w-4 h-4" />
+                                {label}
+                            </label>
+                            <input
+                                type={value ? 'text' : 'password'}
+                                name={name}
+                                value={formData[name]}
+                                onChange={handleInputChange}
+                                className={`${inputClass(name)} pr-12`}
+                                placeholder={label}
+                            />
+                            <span
+                                className={`absolute right-3 top-10 cursor-pointer ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                onClick={() => toggle(!value)}
+                            >
+                                {value ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </span>
+                            {validationErrors[name] && <p className="text-red-400 text-sm mt-1">{validationErrors[name]}</p>}
+                        </div>
+                    ))}
 
-                    {/* Password Field */}
-                    <div className="mb-4 relative">
-                        <label className="block mb-2 font-semibold flex items-center gap-2">
-                            <Lock className="w-4 h-4" />
-                            Password
-                        </label>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            className={`${inputClass('password')} pr-12`}
-                            placeholder="Create a password"
-                        />
-                        <span
-                            className={`absolute right-3 top-10 cursor-pointer transition-colors duration-200 ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </span>
-                        {validationErrors.password && (
-                            <p className="text-red-400 text-sm mt-1">{validationErrors.password}</p>
-                        )}
-                    </div>
-
-                    {/* Confirm Password Field */}
-                    <div className="mb-6 relative">
-                        <label className="block mb-2 font-semibold flex items-center gap-2">
-                            <Lock className="w-4 h-4" />
-                            Confirm Password
-                        </label>
-                        <input
-                            type={showConfirmPassword ? 'text' : 'password'}
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleInputChange}
-                            className={`${inputClass('confirmPassword')} pr-12`}
-                            placeholder="Confirm your password"
-                        />
-                        <span
-                            className={`absolute right-3 top-10 cursor-pointer transition-colors duration-200 ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                                }`}
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        >
-                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </span>
-                        {validationErrors.confirmPassword && (
-                            <p className="text-red-400 text-sm mt-1">{validationErrors.confirmPassword}</p>
-                        )}
-                    </div>
-
-                    {/* Password Requirements */}
+                    {/* Password Tips */}
                     <div className={`mb-6 p-3 rounded-lg text-sm ${isDark ? 'bg-gray-800/30' : 'bg-gray-100/50'}`}>
                         <p className="font-semibold mb-2">Password Requirements:</p>
                         <ul className="space-y-1">
-                            <li className={`flex items-center gap-2 ${formData.password.length >= 4 && formData.password.length <= 12 ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'
-                                }`}>
-                                <span className="w-1 h-1 bg-current rounded-full"></span>
-                                4-12 characters long
-                            </li>
-                            <li className={`flex items-center gap-2 ${/[A-Z]/.test(formData.password) ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'
-                                }`}>
-                                <span className="w-1 h-1 bg-current rounded-full"></span>
-                                At least 1 uppercase letter
-                            </li>
-                            <li className={`flex items-center gap-2 ${/\d/.test(formData.password) ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'
-                                }`}>
-                                <span className="w-1 h-1 bg-current rounded-full"></span>
-                                At least 1 number
-                            </li>
-                            <li className={`flex items-center gap-2 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'
-                                }`}>
-                                <span className="w-1 h-1 bg-current rounded-full"></span>
-                                At least 1 special character
-                            </li>
+                            {[
+                                { condition: formData.password.length >= 4 && formData.password.length <= 12, text: '4–12 characters long' },
+                                { condition: /[A-Z]/.test(formData.password), text: 'At least 1 uppercase letter' },
+                                { condition: /\d/.test(formData.password), text: 'At least 1 number' },
+                                { condition: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password), text: 'At least 1 special character' }
+                            ].map(({ condition, text }, idx) => (
+                                <li
+                                    key={idx}
+                                    className={`flex items-center gap-2 ${condition ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'}`}
+                                >
+                                    <span className="w-1 h-1 bg-current rounded-full"></span>
+                                    {text}
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
+                    {/* Submit Button */}
                     <button
                         onClick={handleSignup}
-                        className={`w-full py-3 rounded-xl font-bold text-lg flex justify-center items-center gap-3 transition-all duration-300 shadow-xl hover:scale-103 active:scale-98 ${isDark
+                        className={`w-full py-3 rounded-xl font-bold text-lg flex justify-center items-center gap-3 transition-all shadow-xl hover:scale-103 active:scale-98 ${isDark
                             ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
                             : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
                             }`}
@@ -350,14 +275,18 @@ const Signup = () => {
 
                     <p className={`text-center mt-4 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         Already have an account?
-                        <span className={`ml-1 cursor-pointer font-semibold ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-blue-600 hover:text-blue-700'}`}>
-                            Sign in
-                        </span>
+                        <a
+                            href="/auth/login"
+                            className={`ml-2 font-medium ${isDark ? 'text-purple-300 hover:text-purple-100' : 'text-blue-600 hover:text-blue-800'
+                                }`}
+                        >
+                            Login
+                        </a>
                     </p>
                 </div>
             </div>
 
-            {/* CSS Animation */}
+            {/* Animations */}
             <style jsx>{`
         @keyframes fadeInUp {
           from {
@@ -369,21 +298,14 @@ const Signup = () => {
             transform: translateY(0);
           }
         }
-        
+        .animate-fadeInUp {
+          animation: fadeInUp 0.6s ease-out;
+        }
         .hover\\:scale-103:hover {
           transform: scale(1.03);
         }
-        
         .active\\:scale-98:active {
           transform: scale(0.98);
-        }
-        
-        .hover\\:scale-105:hover {
-          transform: scale(1.05);
-        }
-        
-        .active\\:scale-95:active {
-          transform: scale(0.95);
         }
       `}</style>
         </div>

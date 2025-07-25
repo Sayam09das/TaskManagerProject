@@ -29,7 +29,7 @@ database();
 
 // API Routes
 app.use('/auth', authRoutes);
-app.use('/protected', protectedRoutes);
+app.use('/', protectedRoutes);
 
 
 
