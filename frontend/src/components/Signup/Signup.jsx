@@ -148,7 +148,7 @@ const Signup = () => {
                     showToast(loginData.message || 'Login after signup failed', 'error');
                 }
             }
-
+            
             else {
                 showToast(data.message || 'Signup failed', 'error');
             }

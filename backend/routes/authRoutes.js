@@ -8,6 +8,7 @@ const {
     verifyOtp,
     resetPassword,
     resendOtp,
+    getCurrentUser,
 } = require('../controllers/userController');
 
 const { authenticateToken } = require('../middleware/authMiddleware');
@@ -20,9 +21,11 @@ router.post('/forgot-password', forgotPassword);
 router.post('/verify-otp', verifyOtp);
 router.post('/reset-password', resetPassword);
 router.post('/resend-otp', resendOtp);
+router.get('/me', authenticateToken, getCurrentUser);
+
 
 // Example protected route
-router.get('/protected', authenticateToken, (req, res) => {
+router.get('/', authenticateToken, (req, res) => {
     res.json({ message: 'This is a protected route' });
 });
 

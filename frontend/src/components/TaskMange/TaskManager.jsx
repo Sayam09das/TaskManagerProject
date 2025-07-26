@@ -71,13 +71,31 @@ const TaskManager = () => {
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    // User data (simulated)
-    const user = {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        avatar: 'JD',
-        joinDate: 'January 2024'
+    const [user, setUser] = useState(null);
+
+    const getInitials = (fullName) => {
+        if (!fullName) return '';
+        const nameParts = fullName.trim().split(' ');
+        const initials = nameParts.map(part => part[0]?.toUpperCase()).filter(Boolean);
+        return initials.slice(0, 2).join('');
     };
+
+    useEffect(() => {
+        axios.get('http://localhost:3000/auth/me', { withCredentials: true }) // ✅ Correct backend port
+            .then(res => {
+                const { name, email, createdAt } = res.data.user;
+                const joinDate = new Date(createdAt).toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                });
+                const avatar = getInitials(name);
+                setUser({ name, email, avatar, joinDate });
+            })
+            .catch(err => {
+                console.error('Failed to fetch user info:', err);
+            });
+    }, []);
+
 
     // Toast functionality
     const showToast = (message, type) => {
@@ -249,15 +267,17 @@ const TaskManager = () => {
 
                             {/* User Profile */}
                             <div className="flex items-center space-x-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${isDark ? 'bg-purple-600 text-white' : 'bg-blue-600 text-white'
-                                    }`}>
-                                    {user.avatar}
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${isDark ? 'bg-purple-600 text-white' : 'bg-blue-600 text-white'}`}>
+                                    {user?.avatar}
                                 </div>
+
                                 <div className={`hidden sm:block ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                    <p className="font-semibold text-sm">{user.name}</p>
-                                    <p className="text-xs opacity-70">{user.email}</p>
+                                    <p className="font-semibold text-sm">{user?.name}</p>
+                                    <p className="text-xs opacity-70">{user?.email}</p>
                                 </div>
                             </div>
+
+
 
                             {/* Logout Button */}
                             <button

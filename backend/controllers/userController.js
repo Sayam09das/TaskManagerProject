@@ -93,10 +93,15 @@ exports.loginUser = [
             if (!isMatch) return res.status(401).json({ message: 'Invalid password' });
 
             const token = jwt.sign(
-                { id: user._id },
+                {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email
+                },
                 process.env.JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRATION || '1h' } // ✅ fallback
+                { expiresIn: process.env.JWT_EXPIRATION || '1h' }
             );
+
 
             res.cookie('authToken', token, {
                 httpOnly: true,
@@ -308,3 +313,29 @@ Use it to verify your account or reset your password.
         }
     }
 ];
+exports.getCurrentUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId).select('name email createdAt');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const avatar = user.name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase();
+
+        res.status(200).json({
+            user: {
+                name: user.name,
+                email: user.email,
+                avatar,
+                joinDate: new Date(user.createdAt).toLocaleString('default', {
+                    month: 'long',
+                    year: 'numeric'
+                })
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
