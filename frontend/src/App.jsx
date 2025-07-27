@@ -8,6 +8,8 @@ import Schedulo from './components/TaskMange/TaskManager';
 import PrivateRoute from './components/PrivateRoute';
 import PublicRouteWithRedirect from './components/PublicRouteWithRedirect';
 import ForgotPassword from './components/ForgotPassword/ForgotPassword';
+import OtpVerification from './components/OtpVerification/OtpVerification';
+import ConfirmPassword from './components/ConfirmPassword/ConfirmPassword';
 
 const App = () => {
   return (
@@ -24,6 +26,8 @@ const App = () => {
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<Signup />} />
         <Route path='/auth/forget-password' element={<ForgotPassword />} />
+        <Route path='/auth/otp-verification' element={<OtpVerification />} />
+        <Route path='/auth/confirm-password' element={<ConfirmPassword />} />
         <Route
           path="/schedulo"
           element={
