@@ -12,6 +12,7 @@ const database = require('./database/db');
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
+const taskRoute = require('./routes/taskRoute');
 const protectedRoutes = require('./routes/protectedRoutes');
 
 // Middleware
@@ -30,7 +31,7 @@ database();
 // API Routes
 app.use('/auth', authRoutes);
 app.use('/', protectedRoutes);
-
+app.use('/api/task', taskRoute);
 
 
 module.exports = app;

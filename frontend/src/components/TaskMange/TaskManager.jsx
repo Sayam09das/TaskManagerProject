@@ -26,42 +26,74 @@ import {
 const TaskManager = () => {
     const [isDark, setIsDark] = useState(false);
     const navigate = useNavigate();
-    const [tasks, setTasks] = useState([
-        {
-            id: 1,
-            title: 'Complete project proposal',
-            description: 'Finish the quarterly project proposal for client review',
-            priority: 'high',
-            status: 'todo',
-            dueDate: '2025-07-25',
-            createdAt: '2025-07-20'
-        },
-        {
-            id: 2,
-            title: 'Team meeting preparation',
-            description: 'Prepare agenda and materials for weekly team sync',
-            priority: 'medium',
-            status: 'in-progress',
-            dueDate: '2025-07-24',
-            createdAt: '2025-07-21'
-        },
-        {
-            id: 3,
-            title: 'Code review',
-            description: 'Review pull requests from development team',
-            priority: 'low',
-            status: 'completed',
-            dueDate: '2025-07-23',
-            createdAt: '2025-07-19'
-        }
-    ]);
 
+    const [tasks, setTasks] = useState([]);
     const [newTask, setNewTask] = useState({
         title: '',
         description: '',
         priority: 'medium',
         dueDate: ''
     });
+
+    useEffect(() => {
+        axios.get('http://localhost:3000/api/task/all', { withCredentials: true })
+            .then(res => {
+                setTasks(res.data.tasks);
+            })
+            .catch(err => {
+                console.error('Failed to fetch tasks:', err);
+                showToast('Failed to load tasks', 'error');
+            });
+    }, []);
+
+    const addTask = () => {
+        if (!newTask.title.trim()) {
+            showToast('Please enter a task title', 'error');
+            return;
+        }
+
+        axios.post('http://localhost:3000/api/task/add', newTask, { withCredentials: true })
+            .then(res => {
+                setTasks(prev => [res.data.task, ...prev]);
+                setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
+                setShowAddTask(false);
+                showToast('Task added successfully!', 'success');
+            })
+            .catch(err => {
+                console.error('Add task error:', err);
+                showToast('Failed to add task', 'error');
+            });
+    };
+
+    const updateTask = (id, updates) => {
+        axios.put(`http://localhost:3000/api/task/update/${id}`, updates, { withCredentials: true })
+            .then(res => {
+                setTasks(prev =>
+                    prev.map(task => (task._id === id ? res.data.task : task))
+                );
+                showToast('Task updated successfully!', 'success');
+            })
+            .catch(err => {
+                console.error('Update task error:', err);
+                showToast('Failed to update task', 'error');
+            });
+    };
+
+    const deleteTask = (id) => {
+        axios.delete(`http://localhost:3000/api/task/delete/${id}`, { withCredentials: true })
+            .then(() => {
+                setTasks(prev => prev.filter(task => task._id !== id));
+                showToast('Task deleted successfully!', 'success');
+            })
+            .catch(err => {
+                console.error('Delete task error:', err);
+                showToast('Failed to delete task', 'error');
+            });
+    };
+
+
+
+
 
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
@@ -81,7 +113,7 @@ const TaskManager = () => {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:3000/auth/me', { withCredentials: true }) // ✅ Correct backend port
+        axios.get('http://localhost:3000/auth/me', { withCredentials: true })
             .then(res => {
                 const { name, email, createdAt } = res.data.user;
                 const joinDate = new Date(createdAt).toLocaleString('default', {
@@ -96,8 +128,6 @@ const TaskManager = () => {
             });
     }, []);
 
-
-    // Toast functionality
     const showToast = (message, type) => {
         setToast({ show: true, message, type });
         setTimeout(() => {
@@ -105,59 +135,6 @@ const TaskManager = () => {
         }, 3000);
     };
 
-    // Task management functions
-    const addTask = () => {
-        if (!newTask.title.trim()) {
-            showToast('Please enter a task title', 'error');
-            return;
-        }
-
-        const task = {
-            id: Date.now(),
-            ...newTask,
-            status: 'todo',
-            createdAt: new Date().toISOString().split('T')[0]
-        };
-
-        setTasks(prev => [task, ...prev]);
-        setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
-        setShowAddTask(false);
-        showToast('Task added successfully!', 'success');
-    };
-
-    const updateTask = (id, updates) => {
-        setTasks(prev => prev.map(task =>
-            task.id === id ? { ...task, ...updates } : task
-        ));
-    };
-
-    const deleteTask = (id) => {
-        setTasks(prev => prev.filter(task => task.id !== id));
-        showToast('Task deleted successfully!', 'success');
-    };
-
-    const toggleTaskStatus = (id) => {
-        const task = tasks.find(t => t.id === id);
-        let newStatus;
-
-        switch (task.status) {
-            case 'todo':
-                newStatus = 'in-progress';
-                break;
-            case 'in-progress':
-                newStatus = 'completed';
-                break;
-            case 'completed':
-                newStatus = 'todo';
-                break;
-            default:
-                newStatus = 'todo';
-        }
-
-        updateTask(id, { status: newStatus });
-    };
-
-    // Logout functionality with axios
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
@@ -166,7 +143,7 @@ const TaskManager = () => {
             });
             showToast('Logged out successfully!', 'success');
             setTimeout(() => {
-                navigate('/'); // redirect to GetStarted or Login
+                navigate('/');
             }, 1000);
         } catch (error) {
             console.error('Logout failed:', error);
@@ -175,25 +152,61 @@ const TaskManager = () => {
             setIsLoggingOut(false);
         }
     };
+    const toggleTaskStatus = async (taskId) => {
+        try {
+            const response = await axios.put(
+                `http://localhost:3000/api/task/toggle-status/${taskId}`,
+                {},
+                { withCredentials: true }
+            );
 
-    // Filter tasks
+            const updatedTask = response.data.task;
+
+            setTasks((prevTasks) =>
+                prevTasks.map((task) =>
+                    task._id === updatedTask._id ? updatedTask : task
+                )
+            );
+
+            showToast('Task status updated successfully!', 'success');
+        } catch (error) {
+            console.error('Toggle task status error:', error);
+            showToast('Failed to update task status', 'error');
+        }
+    };
+
+
+
+
+
     const filteredTasks = tasks.filter(task => {
-        const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            task.description.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
-        const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
+        const status = task.status?.toLowerCase();
+        const priority = task.priority?.toLowerCase();
+
+        const matchesSearch =
+            task.title.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+            task.description.toLowerCase().includes(searchTerm.trim().toLowerCase());
+
+        const matchesStatus =
+            filterStatus.toLowerCase() === 'all' || status === filterStatus.toLowerCase();
+
+        const matchesPriority =
+            filterPriority.toLowerCase() === 'all' || priority === filterPriority.toLowerCase();
 
         return matchesSearch && matchesStatus && matchesPriority;
     });
 
-    // Dashboard statistics
+
+
+
     const stats = {
         total: tasks.length,
-        completed: tasks.filter(t => t.status === 'completed').length,
-        inProgress: tasks.filter(t => t.status === 'in-progress').length,
-        pending: tasks.filter(t => t.status === 'todo').length,
-        overdue: tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length
+        completed: tasks.filter(t => t.status?.toLowerCase() === 'completed').length,
+        inProgress: tasks.filter(t => t.status?.toLowerCase() === 'in-progress').length,
+        pending: tasks.filter(t => t.status?.toLowerCase() === 'todo').length,
+        overdue: tasks.filter(t => new Date(t.dueDate) < new Date() && t.status?.toLowerCase() !== 'completed').length
     };
+
 
     const completionRate = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
 
@@ -228,7 +241,6 @@ const TaskManager = () => {
                 return <Circle className="w-5 h-5 text-gray-400" />;
         }
     };
-
     return (
         <div className={`min-h-screen transition-colors duration-500 ${backgroundClass}`}>
             {/* Toast Notification */}
@@ -250,9 +262,12 @@ const TaskManager = () => {
                             <div className={`p-2 rounded-xl ${isDark ? 'bg-purple-600' : 'bg-blue-600'}`}>
                                 <Target className="w-6 h-6 text-white" />
                             </div>
-                            <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                TaskFlow
-                            </h1>
+                            <a href="/schedulo">
+                                <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    Schedulo
+                                </h1>
+                            </a>
+
                         </div>
 
                         <div className="flex items-center space-x-4">
@@ -485,13 +500,20 @@ const TaskManager = () => {
                                 <button
                                     onClick={() => {
                                         if (editingTask) {
-                                            updateTask(editingTask.id, editingTask);
+                                            updateTask(editingTask._id, {
+                                                title: editingTask.title,
+                                                description: editingTask.description,
+                                                dueDate: editingTask.dueDate,
+                                                priority: editingTask.priority,
+                                                status: editingTask.status,
+                                            });
                                             setEditingTask(null);
                                             showToast('Task updated successfully!', 'success');
                                         } else {
                                             addTask();
                                         }
                                     }}
+
                                     className={`px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 ${isDark ? 'bg-purple-600 text-white hover:bg-purple-500' : 'bg-blue-600 text-white hover:bg-blue-500'
                                         }`}
                                 >
@@ -520,13 +542,13 @@ const TaskManager = () => {
                     ) : (
                         filteredTasks.map((task) => (
                             <div
-                                key={task.id}
+                                key={task._id}
                                 className={`p-6 rounded-2xl border-2 backdrop-blur-md transition-all duration-300 hover:scale-102 ${cardClass}`}
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-start space-x-4 flex-1">
                                         <button
-                                            onClick={() => toggleTaskStatus(task.id)}
+                                            onClick={() => toggleTaskStatus(task._id)}
                                             className="mt-1 hover:scale-110 transition-transform duration-200"
                                         >
                                             {getStatusIcon(task.status)}
@@ -541,7 +563,7 @@ const TaskManager = () => {
                                                     {task.title}
                                                 </h3>
                                                 <span className={`px-2 py-1 rounded-lg text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                                                    {task.priority.toUpperCase()}
+                                                    {task.priority ? task.priority.toUpperCase() : 'UNKNOWN'}
                                                 </span>
                                             </div>
 
@@ -583,7 +605,7 @@ const TaskManager = () => {
                                         </button>
 
                                         <button
-                                            onClick={() => deleteTask(task.id)}
+                                            onClick={() => deleteTask(task._id)}
                                             className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${isDark ? 'text-red-400 hover:bg-red-900/30' : 'text-red-600 hover:bg-red-100'
                                                 }`}
                                         >
@@ -596,21 +618,20 @@ const TaskManager = () => {
                     )}
                 </div>
             </div>
+            <style>{`
+  .hover\\:scale-102:hover {
+    transform: scale(1.02);
+  }
 
-            {/* CSS for hover effects */}
-            <style jsx>{`
-        .hover\\:scale-102:hover {
-          transform: scale(1.02);
-        }
-        
-        .hover\\:scale-105:hover {
-          transform: scale(1.05);
-        }
-        
-        .hover\\:scale-110:hover {
-          transform: scale(1.1);
-        }
-      `}</style>
+  .hover\\:scale-105:hover {
+    transform: scale(1.05);
+  }
+
+  .hover\\:scale-110:hover {
+    transform: scale(1.1);
+  }
+`}</style>
+
         </div>
     );
 };
