@@ -193,6 +193,7 @@ const TaskManager = () => {
         const matchesPriority =
             filterPriority.toLowerCase() === 'all' || priority === filterPriority.toLowerCase();
 
+
         return matchesSearch && matchesStatus && matchesPriority;
     });
 
@@ -203,7 +204,7 @@ const TaskManager = () => {
         total: tasks.length,
         completed: tasks.filter(t => t.status?.toLowerCase() === 'completed').length,
         inProgress: tasks.filter(t => t.status?.toLowerCase() === 'in-progress').length,
-        pending: tasks.filter(t => t.status?.toLowerCase() === 'todo').length,
+        pending: tasks.filter(t => t.status?.toLowerCase() === 'pending').length,
         overdue: tasks.filter(t => new Date(t.dueDate) < new Date() && t.status?.toLowerCase() !== 'completed').length
     };
 
@@ -395,7 +396,7 @@ const TaskManager = () => {
                                         }`}
                                 >
                                     <option value="all">All Status</option>
-                                    <option value="todo">To Do</option>
+                                    <option value="pending">To Do</option>
                                     <option value="in-progress">In Progress</option>
                                     <option value="completed">Completed</option>
                                 </select>
