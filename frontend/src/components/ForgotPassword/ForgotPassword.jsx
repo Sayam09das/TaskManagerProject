@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import { Sun, Moon, Mail, Send, RefreshCw } from 'lucide-react';
+import axios from 'axios';
 
 const ForgotPassword = () => {
+    const navigate = useNavigate();
     const [isDark, setIsDark] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [email, setEmail] = useState('');
@@ -9,7 +12,6 @@ const ForgotPassword = () => {
     const [validationErrors, setValidationErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-    // Proxy email domains list
     const proxyDomains = [
         'tempmail.org', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
         'temp-mail.org', 'throwaway.email', 'fakeinbox.com', 'maildrop.cc',
@@ -26,7 +28,6 @@ const ForgotPassword = () => {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
-    // Toast functionality
     const showToast = (message, type) => {
         setToast({ show: true, message, type });
         setTimeout(() => {
@@ -34,16 +35,13 @@ const ForgotPassword = () => {
         }, 4000);
     };
 
-    // Email validation
     const validateEmail = (email) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailRegex.test(email)) return false;
-
         const domain = email.split('@')[1]?.toLowerCase();
         return !proxyDomains.includes(domain);
     };
 
-    // Handle forgot password submission
     const handleForgotPassword = async (e) => {
         e.preventDefault();
         const errors = {};
@@ -67,16 +65,37 @@ const ForgotPassword = () => {
         }
 
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            console.log('Sending request to backend...');
+
+            const res = await axios.post(
+                'http://localhost:3000/auth/forgot-password',
+                { email },
+                { withCredentials: true }
+            );
+
+            console.log('Response:', res.data);
+
             setIsLoading(false);
-            showToast('OTP sent to your email successfully!', 'success');
-            // Here you would normally navigate to OTP verification
-        }, 2000);
+            showToast(res.data.message || 'OTP sent to your email!', 'success');
+            navigate(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
+        } catch (err) {
+            setIsLoading(false);
+            console.error('Axios Error:', err); // ✅ View in browser console
+            if (err.response?.data?.message) {
+                showToast(err.response.data.message, 'error');
+            } else {
+                showToast('Server error. Please try again later.', 'error');
+            }
+        }
+
     };
 
     const handleSignInClick = () => {
         showToast('Redirecting to sign in page...', 'success');
+        // Navigate if needed
+        // navigate('/login');
     };
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
@@ -94,7 +113,6 @@ const ForgotPassword = () => {
 
     return (
         <div className={`min-h-screen transition-colors duration-500 relative overflow-hidden ${backgroundClass}`}>
-            {/* Toast Notification */}
             {toast.show && (
                 <div className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-xl border-2 transition-all duration-300 max-w-md text-center ${toast.type === 'error'
                     ? 'bg-red-900/80 border-red-400/50 text-red-100'
@@ -104,16 +122,11 @@ const ForgotPassword = () => {
                 </div>
             )}
 
-            {/* Glowing Orb */}
             <div
                 className={`fixed w-64 h-64 rounded-full pointer-events-none z-0 blur-3xl opacity-20 transition-all duration-500 ease-out ${orbColor}`}
-                style={{
-                    left: mousePosition.x - 128,
-                    top: mousePosition.y - 128,
-                }}
+                style={{ left: mousePosition.x - 128, top: mousePosition.y - 128 }}
             />
 
-            {/* Dark Mode Toggle */}
             <button
                 onClick={() => setIsDark(!isDark)}
                 className={`fixed top-6 right-6 z-50 p-4 rounded-2xl backdrop-blur-xl border-2 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 ${isDark
@@ -124,14 +137,11 @@ const ForgotPassword = () => {
                 {isDark ? <Sun className="w-7 h-7" /> : <Moon className="w-7 h-7" />}
             </button>
 
-            {/* Main Content */}
             <div className="relative z-10 flex items-center justify-center min-h-screen py-8">
-                <div
-                    className={`w-full max-w-md p-8 rounded-3xl shadow-2xl backdrop-blur-md border-2 transform transition-all duration-600 ${isDark
-                        ? 'bg-purple-900/20 border-purple-400/30 text-white'
-                        : 'bg-white/40 border-blue-400/20 text-gray-900'
-                        }`}
-                >
+                <div className={`w-full max-w-md p-8 rounded-3xl shadow-2xl backdrop-blur-md border-2 transform transition-all duration-600 ${isDark
+                    ? 'bg-purple-900/20 border-purple-400/30 text-white'
+                    : 'bg-white/40 border-blue-400/20 text-gray-900'
+                    }`}>
                     <div className="text-center mb-8">
                         <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${isDark ? 'bg-purple-600/20' : 'bg-blue-600/20'
                             }`}>
@@ -174,11 +184,7 @@ const ForgotPassword = () => {
                         )}
                     </div>
 
-                    <button
-                        onClick={handleForgotPassword}
-                        disabled={isLoading}
-                        className={buttonClass}
-                    >
+                    <button onClick={handleForgotPassword} disabled={isLoading} className={buttonClass}>
                         {isLoading ? (
                             <>
                                 <RefreshCw className="w-5 h-5 animate-spin" />
@@ -192,7 +198,6 @@ const ForgotPassword = () => {
                         )}
                     </button>
 
-                    {/* Additional Info */}
                     <div className={`mt-6 p-4 rounded-xl ${isDark ? 'bg-gray-800/30' : 'bg-gray-100/50'}`}>
                         <h4 className="font-semibold mb-2 text-sm">What happens next?</h4>
                         <ul className={`text-xs space-y-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -213,30 +218,22 @@ const ForgotPassword = () => {
 
                     <p className={`text-center mt-6 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         Remember your password?{' '}
-                        <button
-                            onClick={handleSignInClick}
-                            className={`font-semibold transition-all duration-300 hover:scale-105 ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-blue-600 hover:text-blue-700'
-                                }`}
-                        >
+                        <button onClick={handleSignInClick} className={`font-semibold transition-all duration-300 hover:scale-105 ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-blue-600 hover:text-blue-700'}`}>
                             Sign in
                         </button>
                     </p>
 
-                    {/* Security Note */}
-                    <div className={`mt-4 p-3 rounded-lg text-xs text-center ${isDark ? 'bg-purple-900/20 text-purple-300' : 'bg-blue-100/50 text-blue-700'
-                        }`}>
+                    <div className={`mt-4 p-3 rounded-lg text-xs text-center ${isDark ? 'bg-purple-900/20 text-purple-300' : 'bg-blue-100/50 text-blue-700'}`}>
                         🔒 We take your security seriously. The reset link will expire in 5 minutes.
                     </div>
                 </div>
             </div>
 
-            {/* Floating particles effect */}
             <div className="fixed inset-0 pointer-events-none z-0">
                 {[...Array(6)].map((_, i) => (
                     <div
                         key={i}
-                        className={`absolute w-2 h-2 rounded-full opacity-20 animate-pulse ${isDark ? 'bg-purple-400' : 'bg-blue-400'
-                            }`}
+                        className={`absolute w-2 h-2 rounded-full opacity-20 animate-pulse ${isDark ? 'bg-purple-400' : 'bg-blue-400'}`}
                         style={{
                             left: `${20 + i * 15}%`,
                             top: `${20 + i * 10}%`,

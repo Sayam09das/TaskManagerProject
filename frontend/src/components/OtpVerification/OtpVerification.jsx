@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, ArrowLeft, Shield, CheckCircle2, RefreshCw } from 'lucide-react';
+import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 
 const OtpVerification = () => {
+    const location = useLocation(); // ✅ Move inside component
+    const email = new URLSearchParams(location.search).get('email');
     const [isDark, setIsDark] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [email] = useState('user@example.com'); // Mock email
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [toast, setToast] = useState({ show: false, message: '', type: '' });
     const [isLoading, setIsLoading] = useState(false);
-    const [otpTimer, setOtpTimer] = useState(300); // 5 minutes in seconds
+    const [otpTimer, setOtpTimer] = useState(300);
+    const navigate = useNavigate();
     const [canResendOtp, setCanResendOtp] = useState(false);
 
     const otpRefs = useRef([]);
@@ -67,6 +72,11 @@ const OtpVerification = () => {
         }
     };
 
+    if (!email) {
+        showToast('Email is missing. Please go back and enter your email again.', 'error');
+        return;
+    }
+
     // Handle OTP verification
     const handleOtpVerification = async (e) => {
         e.preventDefault();
@@ -78,24 +88,45 @@ const OtpVerification = () => {
         }
 
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            const response = await axios.post(
+                'http://localhost:3000/auth/verify-otp',
+                { email, otp: otpString },
+                { withCredentials: true }
+            );
+
             setIsLoading(false);
-            showToast('OTP verified successfully!', 'success');
-        }, 2000);
+            showToast(response.data.message || 'OTP verified successfully!', 'success');
+            navigate(`/auth/reset-password?email=${encodeURIComponent(email)}`);
+
+        } catch (err) {
+            setIsLoading(false);
+            if (err.response?.data?.message) {
+                showToast(err.response.data.message, 'error');
+            } else {
+                showToast('Server error. Please try again later.', 'error');
+            }
+        }
     };
 
     // Resend OTP
     const handleResendOtp = async () => {
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            setOtpTimer(300);
-            setCanResendOtp(false);
-            setOtp(['', '', '', '', '', '']);
+        try {
+            await axios.post('http://localhost:3000/auth/resend-otp', { email }, { withCredentials: true });
+            setOtpTimer(300); // Reset 5-minute timer
+            setCanResendOtp(false); // Disable button until timer ends
+            setOtp(['', '', '', '', '', '']); // Clear OTP inputs
             showToast('New OTP sent to your email!', 'success');
-        }, 1500);
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to resend OTP', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+
+
 
     // Handle back navigation
     const handleBack = () => {
@@ -227,7 +258,9 @@ const OtpVerification = () => {
                                     <button
                                         onClick={handleResendOtp}
                                         disabled={isLoading}
-                                        className={`text-sm font-semibold transition-all duration-300 hover:scale-105 ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-blue-600 hover:text-blue-700'
+                                        className={`text-sm font-semibold transition-all duration-300 hover:scale-105 ${isDark
+                                            ? 'text-purple-400 hover:text-purple-300'
+                                            : 'text-blue-600 hover:text-blue-700'
                                             } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         {isLoading ? 'Sending...' : 'Resend Code'}
@@ -260,15 +293,20 @@ const OtpVerification = () => {
                         <button
                             type="button"
                             onClick={handleResendOtp}
-                            disabled={!canResendOtp || isLoading}
-                            className={`font-semibold transition-all duration-300 ${canResendOtp && !isLoading
-                                ? isDark ? 'text-purple-400 hover:text-purple-300' : 'text-blue-600 hover:text-blue-700'
-                                : 'opacity-50 cursor-not-allowed'
+                            disabled={otpTimer > 0 || isLoading}
+                            className={`font-semibold transition-all duration-300 
+            ${otpTimer === 0 && !isLoading
+                                    ? isDark
+                                        ? 'text-purple-400 hover:text-purple-300'
+                                        : 'text-blue-600 hover:text-blue-700'
+                                    : 'opacity-50 cursor-not-allowed'
                                 }`}
                         >
-                            Click to resend
+                            {isLoading ? 'Sending...' : `Click to resend${otpTimer > 0 ? ` (${otpTimer}s)` : ''}`}
                         </button>
                     </p>
+
+
                 </div>
             </div>
         </div>

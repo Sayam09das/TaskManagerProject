@@ -186,90 +186,40 @@ If you didn’t request this, ignore this email.
 exports.verifyOtp = [
     body('email').isEmail().withMessage('Valid email required'),
     body('otp').isLength({ min: 4, max: 12 }).withMessage('OTP must be 4–12 digits'),
-
+  
     async (req, res) => {
-        const { email, otp } = req.body;
-
-        try {
-            const user = await User.findOne({ email });
-
-            if (!user || user.otp !== otp || Date.now() > user.otpExpires) {
-                return res.status(400).json({ message: 'Invalid or expired OTP' });
-            }
-
-            user.otp = null;
-            user.otpExpires = null;
-            user.resetVerified = true;
-            await user.save();
-
-            res.status(200).json({ message: 'OTP verified. Proceed to reset password.' });
-
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Server error' });
+      const { email, otp } = req.body;
+  
+      try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ message: 'User not found' });
+  
+  
+        if (String(user.otp) !== String(otp)) {
+          return res.status(400).json({ message: 'Invalid OTP' });
         }
-    }
-];
-
-// ===== RESET PASSWORD =====
-exports.resetPassword = [
-    body('email').isEmail().withMessage('Email is required'),
-    body('newPassword').isLength({ min: 6 }).withMessage('Password too short'),
-
-    async (req, res) => {
-        const { email, newPassword } = req.body;
-
-        try {
-            const user = await User.findOne({ email });
-            if (!user || !user.resetVerified) {
-                return res.status(403).json({ message: 'Unauthorized or invalid reset request' });
-            }
-
-            const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-            user.password = hashedPassword;
-            user.resetVerified = false;
-            user.otp = null;
-            user.otpExpires = null;
-            await user.save();
-
-            const token = jwt.sign(
-                { id: user._id },
-                process.env.JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRATION || '1h' }
-            );
-
-            res.cookie('authToken', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 3600000,
-            });
-
-            const subject = 'Schedulo Password Changed';
-            const text = `
-Hi ${user.name},
-
-✅ Your password was successfully changed.  
-❗ If this wasn’t you, contact our support immediately.
-
-Login: https://schedulo-task.app/login
-
-— Schedulo Task Manager Support
-            `;
-
-            await sendEmail(email, subject, text);
-
-            res.status(200).json({
-                message: 'Password reset successful. Logged in.'
-            });
-
-        } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: 'Server error' });
+  
+        if (Date.now() > user.otpExpires) {
+          return res.status(400).json({ message: 'OTP has expired' });
         }
+  
+        user.otp = null;
+        user.otpExpires = null;
+        user.resetVerified = true;
+        await user.save();
+  
+        res.status(200).json({ message: 'OTP verified. Proceed to reset password.' });
+  
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+      }
     }
-];
+  ];
+  
+
+
+
 
 // ===== RESEND OTP =====
 exports.resendOtp = [
@@ -313,6 +263,36 @@ Use it to verify your account or reset your password.
         }
     }
 ];
+
+exports.resetPassword = [
+    body('email').isEmail().withMessage('Valid email required'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const { email, password } = req.body;
+
+        try {
+            const user = await User.findOne({ email });
+            if (!user || !user.resetVerified) {
+                return res.status(400).json({ message: 'User not verified for reset' });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 12);
+            user.password = hashedPassword;
+            user.resetVerified = false;
+            await user.save();
+
+            res.status(200).json({ message: 'Password has been reset successfully' });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Server error' });
+        }
+    }
+];
+
 exports.getCurrentUser = async (req, res) => {
     try {
         const user = await User.findById(req.userId).select('name email createdAt');

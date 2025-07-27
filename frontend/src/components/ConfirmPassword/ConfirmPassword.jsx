@@ -1,7 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Sun, Moon, Lock, ArrowLeft, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {
+    Eye, EyeOff, Sun, Moon, Lock,
+    ArrowLeft, CheckCircle2, RefreshCw
+} from 'lucide-react';
 
 const ConfirmPassword = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Extract email from URL query param
+    const queryParams = new URLSearchParams(location.search);
+    const email = queryParams.get('email'); // e.g. sayamcomputer2004@gmail.com
+
     const [isDark, setIsDark] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [newPassword, setNewPassword] = useState('');
@@ -20,7 +32,6 @@ const ConfirmPassword = () => {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, []);
 
-    // Toast functionality
     const showToast = (message, type) => {
         setToast({ show: true, message, type });
         setTimeout(() => {
@@ -28,7 +39,6 @@ const ConfirmPassword = () => {
         }, 4000);
     };
 
-    // Password validation
     const validatePassword = (password) => {
         const minLength = password.length >= 4;
         const maxLength = password.length <= 12;
@@ -46,50 +56,67 @@ const ConfirmPassword = () => {
         };
     };
 
-    // Handle password reset
     const handlePasswordReset = async (e) => {
         e.preventDefault();
         const errors = {};
 
+        if (!email) {
+            showToast('Email is missing from URL. Please restart the reset process.', 'error');
+            return;
+        }
+
         if (!newPassword) {
             errors.newPassword = 'New password is required';
         } else {
-            const passwordCheck = validatePassword(newPassword);
-            if (!passwordCheck.isValid) {
-                let errorMsg = 'Password must contain: ';
-                const missing = [];
-                if (!passwordCheck.minLength) missing.push('at least 4 characters');
-                if (!passwordCheck.maxLength) missing.push('at most 12 characters');
-                if (!passwordCheck.hasUppercase) missing.push('1 uppercase letter');
-                if (!passwordCheck.hasNumber) missing.push('1 number');
-                if (!passwordCheck.hasSpecialChar) missing.push('1 special character');
-                errors.newPassword = errorMsg + missing.join(', ');
+            const check = validatePassword(newPassword);
+            if (!check.isValid) {
+                const parts = [];
+                if (!check.minLength) parts.push('at least 4 characters');
+                if (!check.maxLength) parts.push('at most 12 characters');
+                if (!check.hasUppercase) parts.push('1 uppercase letter');
+                if (!check.hasNumber) parts.push('1 number');
+                if (!check.hasSpecialChar) parts.push('1 special character');
+                errors.newPassword = 'Password must contain: ' + parts.join(', ');
             }
         }
 
         if (!confirmPassword) {
             errors.confirmPassword = 'Please confirm your password';
-        } else if (newPassword !== confirmPassword) {
+        } else if (confirmPassword !== newPassword) {
             errors.confirmPassword = 'Passwords do not match';
         }
 
         setValidationErrors(errors);
-
         if (Object.keys(errors).length > 0) {
             showToast('Please fix the errors below', 'error');
             return;
         }
 
-        setIsLoading(true);
-        setTimeout(() => {
+        try {
+            setIsLoading(true);
+            const response = await axios.post('http://localhost:3000/auth/reset-password', {
+                email: email,
+                password: newPassword
+            });
+
             setIsLoading(false);
-            showToast('Password reset successfully! You can now login with your new password.', 'success');
-            // Here you would normally navigate to login or reset form
-        }, 2000);
+            if (response?.data?.message === 'Password has been reset successfully') {
+                showToast('Password reset successfully! You can now login.', 'success');
+                setTimeout(() => {
+                    navigate('/auth/login');
+                }, 2000);
+            } else {
+                showToast('Something went wrong. Please try again.', 'error');
+            }
+        } catch (err) {
+            setIsLoading(false);
+            showToast(err.response?.data?.message || 'Server error. Try again.', 'error');
+        }
     };
 
     const handleBack = () => {
         showToast('Going back to OTP verification...', 'success');
+        navigate(-1); // go back to previous page
     };
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
@@ -97,12 +124,13 @@ const ConfirmPassword = () => {
         ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950'
         : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50';
 
-    const inputClass = (fieldName) => `w-full p-3 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white placeholder-gray-400' : 'bg-white/70 text-gray-900 placeholder-gray-500'
+    const inputClass = (fieldName) =>
+        `w-full p-3 pr-12 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white placeholder-gray-400' : 'bg-white/70 text-gray-900 placeholder-gray-500'
         } ${validationErrors[fieldName] ? 'border-2 border-red-500' : ''}`;
 
     const buttonClass = `w-full py-3 rounded-xl font-bold text-lg flex justify-center items-center gap-3 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 ${isDark
-        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
-        : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
+            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
+            : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`;
 
     const passwordValidation = validatePassword(newPassword);
@@ -293,7 +321,7 @@ const ConfirmPassword = () => {
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-xs font-medium">Password Strength:</span>
                                 <span className={`text-xs font-bold ${passwordValidation.isValid ? 'text-green-400' :
-                                        newPassword.length > 0 ? 'text-yellow-400' : 'text-gray-400'
+                                    newPassword.length > 0 ? 'text-yellow-400' : 'text-gray-400'
                                     }`}>
                                     {passwordValidation.isValid ? 'Strong' :
                                         newPassword.length > 0 ? 'Weak' : 'None'}
@@ -302,7 +330,7 @@ const ConfirmPassword = () => {
                             <div className="w-full bg-gray-600/30 rounded-full h-2">
                                 <div
                                     className={`h-2 rounded-full transition-all duration-500 ${passwordValidation.isValid ? 'bg-green-400 w-full' :
-                                            newPassword.length > 0 ? 'bg-yellow-400 w-1/2' : 'w-0'
+                                        newPassword.length > 0 ? 'bg-yellow-400 w-1/2' : 'w-0'
                                         }`}
                                 ></div>
                             </div>

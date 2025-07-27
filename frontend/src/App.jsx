@@ -25,9 +25,9 @@ const App = () => {
         />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<Signup />} />
-        <Route path='/auth/forget-password' element={<ForgotPassword />} />
-        <Route path='/auth/otp-verification' element={<OtpVerification />} />
-        <Route path='/auth/confirm-password' element={<ConfirmPassword />} />
+        <Route path='/auth/forgot-password' element={<ForgotPassword />} />
+        <Route path='/auth/verify-otp' element={<OtpVerification />} />
+        <Route path='/auth/reset-password' element={<ConfirmPassword />} />
         <Route
           path="/schedulo"
           element={
