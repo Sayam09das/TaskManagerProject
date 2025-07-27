@@ -65,8 +65,8 @@ const Login = () => {
             {toast.show && (
                 <div
                     className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg backdrop-blur-xl border-2 transition-all duration-300 ${toast.type === 'error'
-                            ? 'bg-red-900/80 border-red-400/50 text-red-100'
-                            : 'bg-green-900/80 border-green-400/50 text-green-100'
+                        ? 'bg-red-900/80 border-red-400/50 text-red-100'
+                        : 'bg-green-900/80 border-green-400/50 text-green-100'
                         }`}
                 >
                     {toast.message}
@@ -83,8 +83,8 @@ const Login = () => {
             <button
                 onClick={() => setIsDark(!isDark)}
                 className={`fixed top-6 right-6 z-50 p-4 rounded-2xl backdrop-blur-xl border-2 transition-all duration-300 shadow-xl hover:scale-105 active:scale-95 ${isDark
-                        ? 'bg-purple-900/50 border-purple-400/30 text-yellow-400 hover:bg-purple-800/60'
-                        : 'bg-blue-900/10 border-blue-400/30 text-orange-500 hover:bg-blue-800/20'
+                    ? 'bg-purple-900/50 border-purple-400/30 text-yellow-400 hover:bg-purple-800/60'
+                    : 'bg-blue-900/10 border-blue-400/30 text-orange-500 hover:bg-blue-800/20'
                     }`}
             >
                 {isDark ? <Sun className="w-7 h-7" /> : <Moon className="w-7 h-7" />}
@@ -95,8 +95,8 @@ const Login = () => {
                 <form
                     onSubmit={handleLogin}
                     className={`w-full max-w-md p-10 rounded-3xl shadow-2xl backdrop-blur-md border-2 transition-all duration-600 transform ${isDark
-                            ? 'bg-purple-900/20 border-purple-400/30 text-white'
-                            : 'bg-white/40 border-blue-400/20 text-gray-900'
+                        ? 'bg-purple-900/20 border-purple-400/30 text-white'
+                        : 'bg-white/40 border-blue-400/20 text-gray-900'
                         } animate-[fadeInUp_0.6s_ease-out]`}
                 >
                     <h2 className="text-4xl font-extrabold mb-6 text-center">Login</h2>
@@ -136,20 +136,20 @@ const Login = () => {
 
                     {/* Forgot Password */}
                     <div className="text-sm mb-6 text-right">
-                        <span
-                            className={`font-medium cursor-not-allowed opacity-60 ${isDark ? 'text-purple-300' : 'text-blue-600'
-                                }`}
+                        <a
+                            href="/auth/forget-password"
+                            className={`font-medium ${isDark ? 'text-purple-300' : 'text-blue-600'}`}
                         >
                             Forgot password?
-                        </span>
+                        </a>
                     </div>
 
                     {/* Submit Button */}
                     <button
                         type="submit"
                         className={`w-full py-3 rounded-xl font-bold text-lg flex justify-center items-center gap-3 transition-all duration-300 shadow-xl hover:scale-103 active:scale-98 ${isDark
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
-                                : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
+                            : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
                             }`}
                     >
                         <LogIn className="w-5 h-5" /> Login

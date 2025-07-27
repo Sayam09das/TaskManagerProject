@@ -7,6 +7,7 @@ import Signup from './components/Signup/Signup';
 import Schedulo from './components/TaskMange/TaskManager';
 import PrivateRoute from './components/PrivateRoute';
 import PublicRouteWithRedirect from './components/PublicRouteWithRedirect';
+import ForgotPassword from './components/ForgotPassword/ForgotPassword';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<Signup />} />
+        <Route path='/auth/forget-password' element={<ForgotPassword />} />
         <Route
           path="/schedulo"
           element={
