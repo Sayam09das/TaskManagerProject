@@ -16,14 +16,24 @@ const taskRoute = require('./routes/taskRoute');
 const protectedRoutes = require('./routes/protectedRoutes');
 
 // Middleware
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://schedulo-m21t.onrender.com',
+    'https://taskmanagerproject-iewf.onrender.com'
+];
+
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'https://schedulo-m21t.onrender.com',
-        'https://taskmanagerproject-iewf.onrender.com'
-    ],
+    origin: function (origin, callback) {
+        // allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS: ' + origin));
+        }
+    },
     credentials: true
 }));
+
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
