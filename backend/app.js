@@ -16,20 +16,20 @@ const taskRoute = require('./routes/taskRoute');
 const protectedRoutes = require('./routes/protectedRoutes');
 
 // Middleware
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://schedulo-m21t.onrender.com',
-];
+app.use(cors({
+    origin: ['https://schedulo-m21t.onrender.com'], // Your frontend domain
+    credentials: true
+}));
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
 }));
 
 
