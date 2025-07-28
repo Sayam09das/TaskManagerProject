@@ -17,7 +17,8 @@ const protectedRoutes = require('./routes/protectedRoutes');
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://schedulo-m21t.onrender.com'
+    'https://schedulo-m21t.onrender.com',
+    'https://taskmanagerproject-iewf.onrender.com'
 ];
 
 app.use(cors({
