@@ -18,6 +18,7 @@ const protectedRoutes = require('./routes/protectedRoutes');
 
 
 
+
 const allowedOrigins = [
   'http://localhost:5173',
   'https://schedulo-m21t.onrender.com'
@@ -25,11 +26,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin like Postman or curl
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('CORS not allowed for this origin'));
     }
   },
   credentials: true
@@ -41,7 +41,7 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(helmet());
+
 
 // Connect to MongoDB
 database();
