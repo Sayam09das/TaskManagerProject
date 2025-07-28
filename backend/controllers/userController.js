@@ -106,7 +106,7 @@ exports.loginUser = [
             res.cookie('authToken', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'None',
+                sameSite: 'strict',
                 maxAge: 3600000,
             });
 

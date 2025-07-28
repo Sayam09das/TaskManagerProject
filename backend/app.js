@@ -15,45 +15,23 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoute = require('./routes/taskRoute');
 const protectedRoutes = require('./routes/protectedRoutes');
 
-
-
-
-
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://schedulo-m21t.onrender.com'
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS not allowed for this origin'));
-    }
-  },
-  credentials: true
-}));
-
-
-
 // Middleware
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-
+app.use(helmet());
 
 // Connect to MongoDB
 database();
 
-// Routes
+// API Routes
 app.use('/auth', authRoutes);
 app.use('/', protectedRoutes);
 app.use('/api/task', taskRoute);
-app.get('/schedulo', (req, res) => {
-  res.send('Schedulo backend is live!');
-});
 
 
-// Export
 module.exports = app;
