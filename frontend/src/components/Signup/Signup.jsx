@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Sun, Moon, UserPlus, User, Mail, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Moved outside component to prevent re-initialization
 const proxyDomains = [
@@ -11,6 +12,7 @@ const proxyDomains = [
 ];
 
 const Signup = () => {
+    const navigate = useNavigate();
     const [isDark, setIsDark] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [formData, setFormData] = useState({
@@ -112,7 +114,7 @@ const Signup = () => {
         }
 
         try {
-            const res = await fetch('http://localhost:3000/auth/register', {
+            const res = await fetch('${import.meta.env.VITE_API_URL}auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include', // ✅ This is important!
@@ -129,7 +131,7 @@ const Signup = () => {
                 showToast('Signup successful! Logging in...', 'success');
 
                 // Immediately log in the user after signup
-                const loginRes = await fetch('http://localhost:3000/auth/login', {
+                const loginRes = await fetch('${import.meta.env.VITE_API_URL}/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -143,7 +145,9 @@ const Signup = () => {
 
                 if (loginRes.ok) {
                     showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => (window.location.href = '/schedulo'), 1500);
+                    setTimeout(() =>{
+                        navigate('/schedulo');
+                    }, 1500);
                 } else {
                     showToast(loginData.message || 'Login after signup failed', 'error');
                 }

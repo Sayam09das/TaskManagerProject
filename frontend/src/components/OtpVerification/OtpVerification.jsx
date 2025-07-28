@@ -97,7 +97,7 @@ const OtpVerification = () => {
 
             setIsLoading(false);
             showToast(response.data.message || 'OTP verified successfully!', 'success');
-            navigate(`/auth/reset-password?email=${encodeURIComponent(email)}`);
+            navigate(`https://taskmanagerproject-iewf.onrender.com/auth/reset-password?email=${encodeURIComponent(email)}`);
 
         } catch (err) {
             setIsLoading(false);

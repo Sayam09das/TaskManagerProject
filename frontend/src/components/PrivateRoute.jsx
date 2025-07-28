@@ -8,7 +8,7 @@ const PrivateRoute = ({ children }) => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/schedulo', {
+        const res = await axios.get('https://taskmanagerproject-iewf.onrender.com//schedulo', {
           withCredentials: true // ✅ This sends the cookie
         });
 
