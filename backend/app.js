@@ -17,7 +17,11 @@ const protectedRoutes = require('./routes/protectedRoutes');
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // Adjust based on frontend host/port
+    origin: [
+        'http://localhost:5173',
+        'https://schedulo-m21t.onrender.com',
+        'https://taskmanagerproject-iewf.onrender.com'
+    ],
     credentials: true
 }));
 app.use(express.json());
