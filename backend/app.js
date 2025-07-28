@@ -15,24 +15,28 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoute = require('./routes/taskRoute');
 const protectedRoutes = require('./routes/protectedRoutes');
 
+// Allowed origins for CORS
 const allowedOrigins = [
     'http://localhost:5173',
     'https://schedulo-m21t.onrender.com',
     'https://taskmanagerproject-iewf.onrender.com'
 ];
 
+// CORS middleware
 app.use(cors({
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+        // Allow requests with no origin (like mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            return callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true
 }));
 
-
+// Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -41,10 +45,10 @@ app.use(helmet());
 // Connect to MongoDB
 database();
 
-// API Routes
+// Routes
 app.use('/auth', authRoutes);
 app.use('/', protectedRoutes);
 app.use('/api/task', taskRoute);
 
-
+// Export
 module.exports = app;
