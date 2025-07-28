@@ -94,7 +94,7 @@ const ConfirmPassword = () => {
 
         try {
             setIsLoading(true);
-            const response = await axios.post('${import.meta.env.VITE_API_URL}/auth/reset-password', {
+            const response = await axios.post('http://localhost:3000/auth/reset-password', {
                 email: email,
                 password: newPassword
             });
@@ -103,7 +103,7 @@ const ConfirmPassword = () => {
             if (response?.data?.message === 'Password has been reset successfully') {
                 showToast('Password reset successfully! You can now login.', 'success');
                 setTimeout(() => {
-                    navigate('https://taskmanagerproject-iewf.onrender.com/auth/login');
+                    navigate('/auth/login');
                 }, 2000);
             } else {
                 showToast('Something went wrong. Please try again.', 'error');

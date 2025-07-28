@@ -36,7 +36,7 @@ const TaskManager = () => {
     });
 
     useEffect(() => {
-        axios.get('${import.meta.env.VITE_API_URL}/api/task/all', { withCredentials: true })
+        axios.get('http://localhost:3000/api/task/all', { withCredentials: true })
             .then(res => {
                 setTasks(res.data.tasks);
             })
@@ -52,7 +52,7 @@ const TaskManager = () => {
             return;
         }
 
-        axios.post('${import.meta.env.VITE_API_URL}/api/task/add', newTask, { withCredentials: true })
+        axios.post('http://localhost:3000/api/task/add', newTask, { withCredentials: true })
             .then(res => {
                 setTasks(prev => [res.data.task, ...prev]);
                 setNewTask({ title: '', description: '', priority: 'medium', dueDate: '' });
@@ -66,7 +66,7 @@ const TaskManager = () => {
     };
 
     const updateTask = (id, updates) => {
-        axios.put(`https://taskmanagerproject-iewf.onrender.com/api/task/update/${id}`, updates, { withCredentials: true })
+        axios.put(`http://localhost:3000/api/task/update/${id}`, updates, { withCredentials: true })
             .then(res => {
                 setTasks(prev =>
                     prev.map(task => (task._id === id ? res.data.task : task))
@@ -80,7 +80,7 @@ const TaskManager = () => {
     };
 
     const deleteTask = (id) => {
-        axios.delete(`https://taskmanagerproject-iewf.onrender.com/api/task/delete/${id}`, { withCredentials: true })
+        axios.delete(`http://localhost:3000/api/task/delete/${id}`, { withCredentials: true })
             .then(() => {
                 setTasks(prev => prev.filter(task => task._id !== id));
                 showToast('Task deleted successfully!', 'success');
@@ -113,7 +113,7 @@ const TaskManager = () => {
     };
 
     useEffect(() => {
-        axios.get('https://taskmanagerproject-iewf.onrender.com/auth/me', { withCredentials: true })
+        axios.get('http://localhost:3000/auth/me', { withCredentials: true })
             .then(res => {
                 const { name, email, createdAt } = res.data.user;
                 const joinDate = new Date(createdAt).toLocaleString('default', {
@@ -138,7 +138,7 @@ const TaskManager = () => {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
-            await axios.post('https://taskmanagerproject-iewf.onrender.com/auth/logout', {}, {
+            await axios.post('http://localhost:3000/auth/logout', {}, {
                 withCredentials: true,
             });
             showToast('Logged out successfully!', 'success');
@@ -155,7 +155,7 @@ const TaskManager = () => {
     const toggleTaskStatus = async (taskId) => {
         try {
             const response = await axios.put(
-                `https://taskmanagerproject-iewf.onrender.com/api/task/toggle-status/${taskId}`,
+                `http://localhost:3000/api/task/toggle-status/${taskId}`,
                 {},
                 { withCredentials: true }
             );

@@ -9,7 +9,7 @@ const PublicRouteWithRedirect = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await axios.get('https://taskmanagerproject-iewf.onrender.com/schedulo', {
+                const res = await axios.get('http://localhost:3000/schedulo', {
                     withCredentials: true,
                 });
 

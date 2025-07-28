@@ -70,7 +70,7 @@ const ForgotPassword = () => {
             console.log('Sending request to backend...');
 
             const res = await axios.post(
-                '${import.meta.env.VITE_API_URL}/auth/forgot-password',
+                'http://localhost:3000/auth/forgot-password',
                 { email },
                 { withCredentials: true }
             );
@@ -79,7 +79,7 @@ const ForgotPassword = () => {
 
             setIsLoading(false);
             showToast(res.data.message || 'OTP sent to your email!', 'success');
-            navigate(`https://taskmanagerproject-iewf.onrender.com/auth/verify-otp?email=${encodeURIComponent(email)}`);
+            navigate(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
         } catch (err) {
             setIsLoading(false);
             console.error('Axios Error:', err); // ✅ View in browser console
