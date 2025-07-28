@@ -50,6 +50,10 @@ database();
 app.use('/auth', authRoutes);
 app.use('/', protectedRoutes);
 app.use('/api/task', taskRoute);
+app.get('/schedulo', (req, res) => {
+  res.send('Schedulo backend is live!');
+});
+
 
 // Export
 module.exports = app;
