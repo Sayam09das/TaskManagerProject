@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import ScheduloImg from '../../assets/schedulo.png';
+import ScheduloDarkImg from '../../assets/schedulo-dark.png';
 import {
     Plus,
     Search,
@@ -259,10 +260,16 @@ const TaskManager = () => {
                 }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center space-x-4">
-                            <div className={`p-2 rounded-xl ${isDark ? 'bg-purple-600' : 'bg-blue-600'}`}>
-                                <Target className="w-6 h-6 text-white" />
+                        <div className="flex items-center space-x-1">
+                            <div className="p-2 rounded-xl">
+                                <img
+                                    src={isDark ? ScheduloDarkImg : ScheduloImg}
+                                    alt="Schedulo Logo"
+                                    className="w-22 h-15 object-contain"
+                                />
                             </div>
+
+
                             <a href="/schedulo">
                                 <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                     Schedulo
