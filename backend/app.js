@@ -30,7 +30,7 @@ database();
 
 // API Routes
 app.use('/auth', authRoutes);
-app.use('/', protectedRoutes);
+app.use('/protected', protectedRoutes);
 app.use('/api/task', taskRoute);
 
 
