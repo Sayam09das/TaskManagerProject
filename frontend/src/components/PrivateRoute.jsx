@@ -9,7 +9,7 @@ const PrivateRoute = ({ children }) => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/protected/schedulo`, {
+        const res = await axios.get(`${BACKEND_URL}/schedulo`, {
           withCredentials: true // ✅ This sends the cookie
         });
 
