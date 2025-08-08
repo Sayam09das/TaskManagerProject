@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ScheduloImg from '../../assets/schedulo.png';
-import ScheduloDarkImg from '../../assets/schedulo-dark.png';
+// import ScheduloImg from '../../assets/schedulo.png';
+// import ScheduloDarkImg from '../../assets/schedulo-dark.png';
 import {
     Plus,
     Search,
