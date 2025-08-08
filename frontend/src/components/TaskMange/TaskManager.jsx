@@ -263,11 +263,11 @@ const TaskManager = () => {
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-1">
                             <div className="p-2 rounded-xl">
-                                <img
+                                {/* <img
                                     src={isDark ? ScheduloDarkImg : ScheduloImg}
                                     alt="Schedulo Logo"
                                     className="w-22 h-15 object-contain"
-                                />
+                                /> */}
                             </div>
 
 
