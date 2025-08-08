@@ -8,6 +8,7 @@ router.get('/schedulo', authenticateToken, (req, res) => {
     res.status(200).json({
         message: 'Welcome to the Schedulo Task Manager!',
         user: req.user, // contains decoded JWT info
+        userId: req.userId || 'N/A', // in case you need userId separately
     });
 });
 
