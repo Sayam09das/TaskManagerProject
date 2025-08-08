@@ -140,17 +140,13 @@ const TaskManager = () => {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
-            await axios.post(`https://taskmanagerproject-iewf.onrender.com/auth/logout`, {}, {
+            await axios.post(`${BACKEND_URL}/auth/logout`, {}, {
                 withCredentials: true,
             });
-
-            // Optional: clear local auth state
-            // setUser(null); or dispatch(logoutUser());
-
             showToast('Logged out successfully!', 'success');
-
-            // Navigate immediately after showing toast
-            navigate('/');
+            setTimeout(() => {
+                navigate('/auth/login');
+            }, 1000);
         } catch (error) {
             console.error('Logout failed:', error);
             showToast('Logout failed. Please try again.', 'error');
@@ -158,7 +154,6 @@ const TaskManager = () => {
             setIsLoggingOut(false);
         }
     };
-
     const toggleTaskStatus = async (taskId) => {
         try {
             const response = await axios.put(
