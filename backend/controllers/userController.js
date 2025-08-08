@@ -105,8 +105,8 @@ exports.loginUser = [
 
             res.cookie('authToken', token, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                secure: true,           // ✅ Required for HTTPS (which Render uses)
+                sameSite: 'None',       // ✅ Required if frontend and backend are on different domains
                 maxAge: 3600000,
             });
 
@@ -186,37 +186,37 @@ If you didn’t request this, ignore this email.
 exports.verifyOtp = [
     body('email').isEmail().withMessage('Valid email required'),
     body('otp').isLength({ min: 4, max: 12 }).withMessage('OTP must be 4–12 digits'),
-  
+
     async (req, res) => {
-      const { email, otp } = req.body;
-  
-      try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: 'User not found' });
-  
-  
-        if (String(user.otp) !== String(otp)) {
-          return res.status(400).json({ message: 'Invalid OTP' });
+        const { email, otp } = req.body;
+
+        try {
+            const user = await User.findOne({ email });
+            if (!user) return res.status(400).json({ message: 'User not found' });
+
+
+            if (String(user.otp) !== String(otp)) {
+                return res.status(400).json({ message: 'Invalid OTP' });
+            }
+
+            if (Date.now() > user.otpExpires) {
+                return res.status(400).json({ message: 'OTP has expired' });
+            }
+
+            user.otp = null;
+            user.otpExpires = null;
+            user.resetVerified = true;
+            await user.save();
+
+            res.status(200).json({ message: 'OTP verified. Proceed to reset password.' });
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: 'Server error' });
         }
-  
-        if (Date.now() > user.otpExpires) {
-          return res.status(400).json({ message: 'OTP has expired' });
-        }
-  
-        user.otp = null;
-        user.otpExpires = null;
-        user.resetVerified = true;
-        await user.save();
-  
-        res.status(200).json({ message: 'OTP verified. Proceed to reset password.' });
-  
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
-      }
     }
-  ];
-  
+];
+
 
 
 

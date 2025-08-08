@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios';
-
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const PublicRouteWithRedirect = ({ children }) => {
@@ -11,11 +10,11 @@ const PublicRouteWithRedirect = ({ children }) => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await axios.get(`${BACKEND_URL}/api/auth/check`, {
+                const res = await axios.get(`${BACKEND_URL}/schedulo`, {
                     withCredentials: true,
                 });
 
-                if (res.status === 200 && res.data.authenticated) {
+                if (res.status === 200) {
                     setIsAuthenticated(true);
                 }
             } catch (err) {
