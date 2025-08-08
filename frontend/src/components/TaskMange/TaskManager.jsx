@@ -140,7 +140,7 @@ const TaskManager = () => {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
-            await axios.post(`${BACKEND_URL}/auth/logout`, {}, {
+            await axios.post(`https://taskmanagerproject-iewf.onrender.com/auth/logout`, {}, {
                 withCredentials: true,
             });
             showToast('Logged out successfully!', 'success');
