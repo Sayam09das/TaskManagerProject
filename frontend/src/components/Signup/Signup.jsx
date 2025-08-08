@@ -112,7 +112,7 @@ const Signup = () => {
         }
 
         try {
-            const res = await fetch(`${BACKEND_URL}auth/register`, {
+            const res = await fetch(`${BACKEND_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include', // ✅ This is important!
@@ -129,7 +129,7 @@ const Signup = () => {
                 showToast('Signup successful! Logging in...', 'success');
 
                 // Immediately log in the user after signup
-                const loginRes = await fetch(`${BACKEND_URL}auth/login`, {
+                const loginRes = await fetch(`${BACKEND_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
