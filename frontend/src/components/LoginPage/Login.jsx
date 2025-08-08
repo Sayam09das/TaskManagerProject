@@ -3,6 +3,7 @@ import { Eye, EyeOff, Sun, Moon, LogIn } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+
 const Login = () => {
     const navigate = useNavigate();
     const [isDark, setIsDark] = useState(false);
@@ -31,7 +32,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const res = await fetch('${BACKEND_URL}/auth/login', {
+            const res = await fetch(`${BACKEND_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
