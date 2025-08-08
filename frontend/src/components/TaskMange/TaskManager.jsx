@@ -115,7 +115,7 @@ const TaskManager = () => {
     };
 
     useEffect(() => {
-        axios.get( `${BACKEND_URL}/auth/me`, { withCredentials: true })
+        axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true })
             .then(res => {
                 const { name, email, createdAt } = res.data.user;
                 const joinDate = new Date(createdAt).toLocaleString('default', {
