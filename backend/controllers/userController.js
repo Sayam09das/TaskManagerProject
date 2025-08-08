@@ -126,13 +126,12 @@ exports.loginUser = [
     }
 ];
 
-// ===== LOGOUT USER =====
 exports.logoutUser = async (req, res) => {
     try {
         res.clearCookie("authToken", {
             httpOnly: true,
-            secure: true,           // ✅ Required to match login cookie
-            sameSite: 'None',       // ✅ Must match how it was set
+            secure: true,
+            sameSite: 'None',
         });
 
         res.status(200).json({ message: "Logged out successfully" });
@@ -141,6 +140,7 @@ exports.logoutUser = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 
 // ===== FORGOT PASSWORD =====
