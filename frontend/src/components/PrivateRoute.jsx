@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const PrivateRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -8,7 +9,7 @@ const PrivateRoute = ({ children }) => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/schedulo', {
+        const res = await axios.get(`${BACKEND_URL}/protected/schedulo`, {
           withCredentials: true // ✅ This sends the cookie
         });
 
