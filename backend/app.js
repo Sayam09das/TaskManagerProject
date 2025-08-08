@@ -33,5 +33,12 @@ app.use('/auth', authRoutes);
 app.use('/', protectedRoutes);
 app.use('/api/task', taskRoute);
 
+app.get('/api/auth/check', (req, res) => {
+    if (req.session && req.session.user) {
+        res.status(200).json({ authenticated: true });
+    } else {
+        res.status(401).json({ authenticated: false });
+    }
+});
 
 module.exports = app;
