@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Sun, Moon, UserPlus, User, Mail, Lock } from 'lucide-react';
-
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 // Moved outside component to prevent re-initialization
 const proxyDomains = [
     'tempmail.org', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
@@ -112,7 +112,7 @@ const Signup = () => {
         }
 
         try {
-            const res = await fetch('http://localhost:3000/auth/register', {
+            const res = await fetch(`${BACKEND_URL}auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include', // ✅ This is important!
@@ -129,7 +129,7 @@ const Signup = () => {
                 showToast('Signup successful! Logging in...', 'success');
 
                 // Immediately log in the user after signup
-                const loginRes = await fetch('http://localhost:3000/auth/login', {
+                const loginRes = await fetch(`${BACKEND_URL}auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
