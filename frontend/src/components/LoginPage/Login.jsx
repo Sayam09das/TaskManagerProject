@@ -138,12 +138,12 @@ const Login = () => {
 
                     {/* Forgot Password */}
                     <div className="text-sm mb-6 text-right">
-                        <a
-                            href="/auth/forgot-password"
+                        <Link
+                            to="/auth/forgot-password"
                             className={`font-medium ${isDark ? 'text-purple-300' : 'text-blue-600'}`}
                         >
                             Forgot password?
-                        </a>
+                        </Link>
                     </div>
 
                     {/* Submit Button */}
