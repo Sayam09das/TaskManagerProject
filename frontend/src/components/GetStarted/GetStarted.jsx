@@ -346,7 +346,7 @@ const GetStarted = () => {
                         </Link>
 
                         {/* Create Task Button */}
-                        <Link to="/create-task" className="w-full sm:w-auto">
+                        <Link to="/auth/register" className="w-full sm:w-auto">
                             <motion.button
                                 className={`w-full sm:w-64 h-14 sm:h-16 group px-8 sm:px-12 py-4 sm:py-5 rounded-2xl font-bold text-lg sm:text-xl transition-all duration-300 shadow-2xl relative overflow-hidden flex items-center justify-center ${isDark
                                         ? 'bg-gradient-to-r from-cyan-600 to-purple-600 text-white hover:shadow-cyan-500/50'
