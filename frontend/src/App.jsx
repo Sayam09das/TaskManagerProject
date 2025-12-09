@@ -1,13 +1,22 @@
-import React from 'react'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import './App.css';
+import GetStarted from './components/GetStarted/GetStarted';
+
+
 const App = () => {
   return (
-    <div>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={
+              <GetStarted />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
-      <h1 className='text-amber-300'>Sedulo App</h1>
-      <p className='text-5xl text-red-700'>Welcome to App guys</p>
-    </div>
-  )
-}
-
-export default App
+export default App;
