@@ -41,20 +41,27 @@ const Login = () => {
                 credentials: 'include',
             });
 
-            const data = await res.json();
-
-            if (res.ok) {
-                localStorage.setItem('authToken', data.token);
-                showToast('Login successful!', 'success');
-                navigate('a/schedulo');
-            } else {
-                showToast(data.message || 'Login failed', 'error');
+            let data = {};
+            try {
+                data = await res.json();
+            } catch {
+                data = {};
             }
+
+            if (!res.ok) {
+                showToast(data.message || 'Login failed', 'error');
+                return;
+            }
+
+            localStorage.setItem('authToken', data.token);
+            showToast('Login successful!', 'success');
+            navigate('/schedulo'); // ✅ fixed
         } catch (err) {
             console.error(err);
             showToast('Something went wrong!', 'error');
         }
     };
+
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
     const backgroundClass = isDark
