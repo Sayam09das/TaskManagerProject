@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate, Link } from 'react-router-dom';
 import { Sun, Moon, Mail, Send, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 
@@ -218,9 +218,15 @@ const ForgotPassword = () => {
 
                     <p className={`text-center mt-6 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         Remember your password?{' '}
-                        <button onClick={handleSignInClick} className={`font-semibold transition-all duration-300 hover:scale-105 ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-blue-600 hover:text-blue-700'}`}>
+                        <Link
+                            to="/auth/login"
+                            className={`font-semibold transition-all duration-300 hover:scale-105 ${isDark
+                                    ? 'text-purple-400 hover:text-purple-300'
+                                    : 'text-blue-600 hover:text-blue-700'
+                                }`}
+                        >
                             Sign in
-                        </button>
+                        </Link>
                     </p>
 
                     <div className={`mt-4 p-3 rounded-lg text-xs text-center ${isDark ? 'bg-purple-900/20 text-purple-300' : 'bg-blue-100/50 text-blue-700'}`}>
