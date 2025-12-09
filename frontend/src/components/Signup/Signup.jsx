@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Sun, Moon, UserPlus, User, Mail, Lock } from 'lucide-react';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+import { Link } from "react-router-dom";
 // Moved outside component to prevent re-initialization
 const proxyDomains = [
     'tempmail.org', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
@@ -148,7 +149,7 @@ const Signup = () => {
                     showToast(loginData.message || 'Login after signup failed', 'error');
                 }
             }
-            
+
             else {
                 showToast(data.message || 'Signup failed', 'error');
             }
@@ -297,13 +298,13 @@ const Signup = () => {
 
                     <p className={`text-center mt-4 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         Already have an account?
-                        <a
-                            href="/auth/login"
+                        <Link
+                            to="/auth/login"
                             className={`ml-2 font-medium ${isDark ? 'text-purple-300 hover:text-purple-100' : 'text-blue-600 hover:text-blue-800'
                                 }`}
                         >
                             Login
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </div>
