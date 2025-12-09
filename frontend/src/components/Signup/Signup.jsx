@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Sun, Moon, UserPlus, User, Mail, Lock } from 'lucide-react';
+import { Link, useNavigate } from "react-router-dom";
+
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-import { Link } from "react-router-dom";
+
 // Moved outside component to prevent re-initialization
 const proxyDomains = [
     'tempmail.org', '10minutemail.com', 'guerrillamail.com', 'mailinator.com',
