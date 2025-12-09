@@ -5,11 +5,12 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 
 // ✅ Protected route: /schedulo (accessible to any logged-in user)
 router.get('/schedulo', authenticateToken, (req, res) => {
-    res.status(200).json({
-        message: 'Welcome to the Schedulo Task Manager!',
-        user: req.user, // contains decoded JWT info
-        userId: req.userId || 'N/A', // in case you need userId separately
-    });
+  res.status(200).json({
+    message: 'Welcome to the Schedulo Task Manager!',
+    user: req.user,
+    userId: req.userId || 'N/A',
+  });
 });
+
 
 module.exports = router;

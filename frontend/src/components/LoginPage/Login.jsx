@@ -46,7 +46,7 @@ const Login = () => {
             if (res.ok) {
                 localStorage.setItem('authToken', data.token);
                 showToast('Login successful!', 'success');
-                navigate('/schedulo');
+                navigate('a/schedulo');
             } else {
                 showToast(data.message || 'Login failed', 'error');
             }

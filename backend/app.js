@@ -17,7 +17,7 @@ const protectedRoutes = require('./routes/protectedRoutes');
 
 // Middleware
 app.use(cors({
-    origin: 'https://schedulo-m21t.onrender.com',
+    origin: 'http://localhost:5173',
     credentials: true
 }));
 app.use(express.json());
@@ -30,7 +30,7 @@ database();
 
 // API Routes
 app.use('/auth', authRoutes);
-app.use('/', protectedRoutes);
+app.use('/protected', protectedRoutes); 
 app.use('/api/task', taskRoute);
 
 
