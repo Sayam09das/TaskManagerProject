@@ -109,50 +109,84 @@ const Login = () => {
                 {isDark ? <Sun className="w-7 h-7" /> : <Moon className="w-7 h-7" />}
             </button>
 
-            {/* Password */}
-            <div className="mb-5 relative">
-                <label className="block mb-2 font-semibold">Password</label>
-
-                <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 pr-12 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white' : 'bg-white/70 text-gray-900'
-                        }`}
-                    placeholder="********"
-                />
-
-                <span
-                    className={`absolute right-3 top-10 cursor-pointer transition-colors duration-200 ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    onClick={() => setShowPassword(!showPassword)}
+            {/* Login Form */}
+            <div className="relative z-10 flex items-center justify-center min-h-screen">
+                <form
+                    onSubmit={handleLogin}
+                    className={`w-full max-w-md p-10 rounded-3xl shadow-2xl backdrop-blur-md border-2 transition-all duration-600 transform ${isDark
+                        ? 'bg-purple-900/20 border-purple-400/30 text-white'
+                        : 'bg-white/40 border-blue-400/20 text-gray-900'
+                        } animate-[fadeInUp_0.6s_ease-out]`}
                 >
-                    {showPassword ? <EyeOff /> : <Eye />}
-                </span>
-            </div>
+                    <h2 className="text-4xl font-extrabold mb-6 text-center">Login</h2>
 
-            {/* Password Requirements */}
-            <div className={`mb-4 p-3 rounded-lg text-sm ${isDark ? 'bg-gray-800/30' : 'bg-gray-100/50'}`}>
-                <p className="font-semibold mb-2">Password Requirements:</p>
-                <ul className="space-y-1">
-                    {[
-                        { condition: password.length >= 8 && password.length <= 12, text: '8–12 characters long' },
-                        { condition: /[A-Z]/.test(password), text: 'At least 1 uppercase letter' },
-                        { condition: /\d/.test(password), text: 'At least 1 number' },
-                        { condition: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password), text: 'At least 1 special character' }
-                    ].map(({ condition, text }, idx) => (
-                        <li
-                            key={idx}
-                            className={`flex items-center gap-2 ${condition ? 'text-green-400' : isDark ? 'text-gray-400' : 'text-gray-600'
+                    {/* Email */}
+                    <div className="mb-5">
+                        <label className="block mb-2 font-semibold">Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className={`w-full p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white' : 'bg-white/70 text-gray-900'
+                                }`}
+                            placeholder="example@domain.com"
+                        />
+                    </div>
+
+                    {/* Password */}
+                    <div className="mb-5 relative">
+                        <label className="block mb-2 font-semibold">Password</label>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className={`w-full p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 pr-12 transition-all duration-200 ${isDark ? 'bg-gray-800/50 text-white' : 'bg-white/70 text-gray-900'
+                                }`}
+                            placeholder="********"
+                        />
+                        <span
+                            className={`absolute right-3 top-10 cursor-pointer transition-colors duration-200 ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                                }`}
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                        </span>
+                    </div>
+
+                    {/* Forgot Password */}
+                    <div className="text-sm mb-6 text-right">
+                        <Link
+                            to="/auth/forgot-password"
+                            className={`font-medium ${isDark ? 'text-purple-300' : 'text-blue-600'}`}
+                        >
+                            Forgot password?
+                        </Link>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                        type="submit"
+                        className={`w-full py-3 rounded-xl font-bold text-lg flex justify-center items-center gap-3 transition-all duration-300 shadow-xl hover:scale-103 active:scale-98 ${isDark
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-500 hover:to-pink-500'
+                            : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-500 hover:to-purple-500'
+                            }`}
+                    >
+                        <LogIn className="w-5 h-5" /> Login
+                    </button>
+
+                    {/* Sign Up */}
+                    <p className={`mt-6 text-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Don’t have an account?{' '}
+                        <Link
+                            to="/auth/register"
+                            className={`font-medium transition-colors ${isDark ? 'text-purple-300 hover:text-purple-100' : 'text-blue-600 hover:text-blue-800'
                                 }`}
                         >
-                            <span className="w-1 h-1 bg-current rounded-full"></span>
-                            {text}
-                        </li>
-                    ))}
-                </ul>
+                            Sign Up
+                        </Link>
+                    </p>
+                </form>
             </div>
-
 
             {/* Keyframe Animation */}
             <style>{`
