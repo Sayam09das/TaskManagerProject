@@ -99,7 +99,7 @@ const OtpVerification = () => {
 
             setIsLoading(false);
             showToast(response.data.message || 'OTP verified successfully!', 'success');
-            navigate(`${BACKEND_URL}/auth/reset-password?email=${encodeURIComponent(email)}`);
+            navigate(`/auth/reset-password?email=${encodeURIComponent(email)}`);
 
         } catch (err) {
             setIsLoading(false);
