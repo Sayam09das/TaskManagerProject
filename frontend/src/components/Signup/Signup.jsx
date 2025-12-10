@@ -146,7 +146,7 @@ const Signup = () => {
 
                 if (loginRes.ok) {
                     showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => (window.location.href = '/schedulo'), 1500);
+                    setTimeout(() => (window.location.href = '/login'), 1500);
                 } else {
                     showToast(loginData.message || 'Login after signup failed', 'error');
                 }
