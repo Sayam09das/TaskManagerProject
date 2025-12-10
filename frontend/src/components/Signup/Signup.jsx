@@ -15,6 +15,7 @@ const proxyDomains = [
 
 const Signup = () => {
     const [isDark, setIsDark] = useState(false);
+    const navigate = useNavigate();
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [formData, setFormData] = useState({
         fullName: '',
