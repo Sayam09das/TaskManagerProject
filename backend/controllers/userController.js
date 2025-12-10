@@ -171,7 +171,7 @@ Hi ${user.name},
 🛡️ Your password reset OTP is: ${otp}  
 ⏳ It expires in 5 minutes.
 
-Click to reset: https://schedulo-task.app/reset-password
+Click to reset: https://schedulo-app-theta.vercel.app/reset-password
 
 If you didn’t request this, ignore this email.
 

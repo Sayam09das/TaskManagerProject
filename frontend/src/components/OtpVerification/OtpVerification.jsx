@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, ArrowLeft, Shield, CheckCircle2, RefreshCw } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 
 const OtpVerification = () => {
@@ -90,14 +92,14 @@ const OtpVerification = () => {
         setIsLoading(true);
         try {
             const response = await axios.post(
-                'http://localhost:3000/auth/verify-otp',
+                `${BACKEND_URL}/auth/verify-otp`,
                 { email, otp: otpString },
                 { withCredentials: true }
             );
 
             setIsLoading(false);
             showToast(response.data.message || 'OTP verified successfully!', 'success');
-            navigate(`https://taskmanagerproject-iewf.onrender.com/auth/reset-password?email=${encodeURIComponent(email)}`);
+            navigate(`${BACKEND_URL}/auth/reset-password?email=${encodeURIComponent(email)}`);
 
         } catch (err) {
             setIsLoading(false);
@@ -113,7 +115,7 @@ const OtpVerification = () => {
     const handleResendOtp = async () => {
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:3000/auth/resend-otp', { email }, { withCredentials: true });
+            await axios.post(`${BACKEND_URL}/auth/resend-otp`, { email }, { withCredentials: true });
             setOtpTimer(300); // Reset 5-minute timer
             setCanResendOtp(false); // Disable button until timer ends
             setOtp(['', '', '', '', '', '']); // Clear OTP inputs

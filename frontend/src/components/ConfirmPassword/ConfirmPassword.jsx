@@ -5,6 +5,8 @@ import {
     Eye, EyeOff, Sun, Moon, Lock,
     ArrowLeft, CheckCircle2, RefreshCw
 } from 'lucide-react';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 const ConfirmPassword = () => {
     const location = useLocation();
@@ -94,7 +96,7 @@ const ConfirmPassword = () => {
 
         try {
             setIsLoading(true);
-            const response = await axios.post('http://localhost:3000/auth/reset-password', {
+            const response = await axios.post(`${BACKEND_URL}/auth/reset-password`, {
                 email: email,
                 password: newPassword
             });

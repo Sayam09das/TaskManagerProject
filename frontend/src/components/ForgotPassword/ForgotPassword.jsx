@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Sun, Moon, Mail, Send, RefreshCw } from 'lucide-react';
 import axios from 'axios';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 const ForgotPassword = () => {
     const navigate = useNavigate();
@@ -70,7 +72,7 @@ const ForgotPassword = () => {
             console.log('Sending request to backend...');
 
             const res = await axios.post(
-                'http://localhost:3000/auth/forgot-password',
+                `${BACKEND_URL}auth/forgot-password`,
                 { email },
                 { withCredentials: true }
             );
