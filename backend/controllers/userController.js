@@ -21,7 +21,7 @@ const loginLimiter = rateLimit({
 exports.registerUser = [
     body('name').isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
     body('email').isEmail().withMessage('Valid email required'),
-    body('password').isLength({ max: 12 }).withMessage('Password must be at least 12 characters'),
+    body('password').isLength({ min: 8, max: 12 }).withMessage('Password must be 8–12 characters long'),
 
     async (req, res) => {
         const errors = validationResult(req);
