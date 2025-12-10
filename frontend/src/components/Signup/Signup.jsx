@@ -147,7 +147,7 @@ const Signup = () => {
 
                 if (loginRes.ok) {
                     showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => navigate('/login'), 1500);
+                    setTimeout(() => navigate('/auth/login'), 1500);
                 } else {
                     showToast(loginData.message || 'Login after signup failed', 'error');
                 }
