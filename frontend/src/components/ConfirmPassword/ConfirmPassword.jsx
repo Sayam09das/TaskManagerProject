@@ -41,22 +41,7 @@ const ConfirmPassword = () => {
         }, 4000);
     };
 
-    const validatePassword = (password) => {
-        const minLength = password.length >= 4;
-        const maxLength = password.length <= 12;
-        const hasUppercase = /[A-Z]/.test(password);
-        const hasNumber = /\d/.test(password);
-        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-
-        return {
-            isValid: minLength && maxLength && hasUppercase && hasNumber && hasSpecialChar,
-            minLength,
-            maxLength,
-            hasUppercase,
-            hasNumber,
-            hasSpecialChar
-        };
-    };
+    
 
     const handlePasswordReset = async (e) => {
         e.preventDefault();
@@ -73,7 +58,7 @@ const ConfirmPassword = () => {
             const check = validatePassword(newPassword);
             if (!check.isValid) {
                 const parts = [];
-                if (!check.minLength) parts.push('at least 4 characters');
+                if (!check.minLength) parts.push('at least 8+ characters');
                 if (!check.maxLength) parts.push('at most 12 characters');
                 if (!check.hasUppercase) parts.push('1 uppercase letter');
                 if (!check.hasNumber) parts.push('1 number');
@@ -284,7 +269,7 @@ const ConfirmPassword = () => {
                                 }`}>
                                 <div className={`w-2 h-2 rounded-full transition-colors duration-300 ${passwordValidation.minLength && passwordValidation.maxLength ? 'bg-green-400' : 'bg-current opacity-50'
                                     }`}></div>
-                                4-12 characters long
+                                8-12 characters long
                                 {passwordValidation.minLength && passwordValidation.maxLength && (
                                     <CheckCircle2 className="w-4 h-4 ml-auto" />
                                 )}

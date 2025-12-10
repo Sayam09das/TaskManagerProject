@@ -271,7 +271,7 @@ const Signup = () => {
                         <p className="font-semibold mb-2">Password Requirements:</p>
                         <ul className="space-y-1">
                             {[
-                                { condition: formData.password.length >= 4 && formData.password.length <= 12, text: '4–12 characters long' },
+                                { condition: formData.password.length >= 8 && formData.password.length <= 12, text: '8–12 characters long' },
                                 { condition: /[A-Z]/.test(formData.password), text: 'At least 1 uppercase letter' },
                                 { condition: /\d/.test(formData.password), text: 'At least 1 number' },
                                 { condition: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password), text: 'At least 1 special character' }
@@ -286,6 +286,7 @@ const Signup = () => {
                             ))}
                         </ul>
                     </div>
+
 
                     {/* Submit Button */}
                     <button
