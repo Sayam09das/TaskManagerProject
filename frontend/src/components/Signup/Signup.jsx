@@ -52,7 +52,7 @@ const Signup = () => {
 
     const validatePassword = (password) => {
         const checks = {
-            minLength: password.length >= 4,
+            minLength: password.length >= 8,
             maxLength: password.length <= 12,
             hasUppercase: /[A-Z]/.test(password),
             hasNumber: /\d/.test(password),
@@ -93,7 +93,7 @@ const Signup = () => {
             errors.password = 'Password is required';
         } else if (!pwdCheck.isValid) {
             const issues = [];
-            if (!pwdCheck.minLength) issues.push('4+ chars');
+            if (!pwdCheck.minLength) issues.push('8+ chars');
             if (!pwdCheck.maxLength) issues.push('≤12 chars');
             if (!pwdCheck.hasUppercase) issues.push('1 uppercase letter');
             if (!pwdCheck.hasNumber) issues.push('1 number');
