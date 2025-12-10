@@ -72,7 +72,7 @@ const ForgotPassword = () => {
             console.log('Sending request to backend...');
 
             const res = await axios.post(
-                `${BACKEND_URL}auth/forgot-password`,
+                `${BACKEND_URL}/auth/forgot-password`,
                 { email },
                 { withCredentials: true }
             );
