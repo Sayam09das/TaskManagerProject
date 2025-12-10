@@ -4,14 +4,20 @@ const sgMail = require('@sendgrid/mail');
 // Set SendGrid API key
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, html) => {
     try {
+        // Remove all HTML tags to create a clean plain-text fallback
+        const plainText = html.replace(/<[^>]+>/g, '');
+
         await sgMail.send({
-            to,                                      // recipient
-            from: 'Schedulo <sayamprogrammingworld@gmail.com>', // verified sender
-            subject,                                 // email subject
-            text,                                    // plain text body
-            html: `<p>${text}</p>`,                  // optional HTML body
+            to,
+            from: {
+                name: 'Schedulo',
+                email: process.env.SENDGRID_FROM_EMAIL || 'sayamprogrammingworld@gmail.com'
+            },
+            subject,
+            html,
+            text: plainText,
         });
 
         console.log(`✅ Email sent to ${to}`);

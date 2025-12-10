@@ -25,13 +25,17 @@ exports.registerUser = [
 
     async (req, res) => {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         const { name, email, password } = req.body;
 
         try {
             const existing = await User.findOne({ email });
-            if (existing) return res.status(409).json({ message: 'Email already exists' });
+            if (existing) {
+                return res.status(409).json({ message: 'Email already exists' });
+            }
 
             const hashedPassword = await bcrypt.hash(password, 12);
             const otp = generateOtp();
@@ -48,22 +52,76 @@ exports.registerUser = [
 
             await newUser.save();
 
-            const subject = `Welcome to Schedulo Task Manager!`;
-            const text = `
-Hi ${name},
+            const subject = `Welcome to Schedulo Task Manager, ${name}!`;
 
-🎉 Welcome aboard!
+            const html = `
+<div style="background:#f5f7ff; padding:30px; font-family:'Segoe UI', Arial, sans-serif;">
+  <div style="
+    max-width:600px;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:12px;
+    padding:32px;
+    box-shadow:0 5px 25px rgba(0,0,0,0.1);
+  ">
+    
+    <div style="text-align:center; margin-bottom:20px;">
+      <h1 style="color:#4e46e5; font-size:28px; margin:0;">🎉 Welcome to Schedulo!</h1>
+      <p style="color:#555; font-size:16px; margin-top:8px;">We’re excited to have you onboard</p>
+    </div>
 
-Your account has been successfully created on Schedulo Task Manager. We’re excited to help you manage your tasks more efficiently.
+    <p style="color:#333; font-size:16px;">
+      Hi <strong>${name}</strong>,
+    </p>
 
-If you didn’t register, please contact support immediately.
+    <p style="color:#444; font-size:15px; line-height:1.7;">
+      Your account has been successfully created on <strong>Schedulo Task Manager</strong>.<br/>
+      You’re now ready to organize tasks, stay productive, and manage your entire day effortlessly.
+    </p>
 
-Thanks,  
-The Schedulo Team  
-https://schedulo-task.app
-            `;
+    <div style="
+      background:#eef2ff;
+      padding:16px;
+      border-radius:8px;
+      margin:20px 0;
+      color:#4e46e5;
+      font-size:15px;
+      border-left:4px solid #4e46e5;
+    ">
+      <strong>Your account email:</strong> ${email}
+    </div>
 
-            await sendEmail(email, subject, text);
+    <p style="color:#444; font-size:15px; line-height:1.7;">
+      If you didn’t create this account, please ignore this email or contact our support team immediately.
+    </p>
+
+    <div style="text-align:center; margin:30px 0;">
+      <a href="https://schedulo-app-theta.vercel.app"
+        style="
+          background:#4e46e5;
+          padding:12px 28px;
+          color:#ffffff;
+          font-size:16px;
+          text-decoration:none;
+          border-radius:6px;
+          display:inline-block;
+        ">
+        Go to Schedulo
+      </a>
+    </div>
+
+    <p style="color:#666; font-size:13px; text-align:center; margin-top:8px;">
+      Thank you for choosing <strong>Schedulo</strong> 💜
+    </p>
+  </div>
+
+  <p style="text-align:center; color:#999; font-size:12px; margin-top:16px;">
+    This is an automated message, please do not reply.
+  </p>
+</div>
+            `.trim();
+
+            await sendEmail(email, subject, html);
 
             res.status(201).json({ message: 'Registration successful.' });
         } catch (err) {
@@ -72,6 +130,7 @@ https://schedulo-task.app
         }
     }
 ];
+
 
 // ===== LOGIN USER =====
 exports.loginUser = [
@@ -142,20 +201,23 @@ exports.logoutUser = async (req, res) => {
 };
 
 
-
 // ===== FORGOT PASSWORD =====
 exports.forgotPassword = [
     body('email').isEmail().withMessage('Valid email required'),
 
     async (req, res) => {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         const { email } = req.body;
 
         try {
             const user = await User.findOne({ email });
-            if (!user) return res.status(404).json({ message: 'User not found' });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
 
             const otp = generateOtp();
             const otpExpires = Date.now() + 5 * 60 * 1000;
@@ -164,21 +226,79 @@ exports.forgotPassword = [
             user.otpExpires = otpExpires;
             await user.save();
 
-            const subject = `Schedulo Password Reset – OTP Inside`;
-            const text = `
-Hi ${user.name},
+            const subject = `Schedulo Password Reset – OTP Code`;
 
-🛡️ Your password reset OTP is: ${otp}  
-⏳ It expires in 5 minutes.
+            const html = `
+<div style="background:#f5f7ff; padding:30px; font-family:'Segoe UI', Arial, sans-serif;">
+  <div style="
+    max-width:600px;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:12px;
+    padding:32px;
+    box-shadow:0 5px 25px rgba(0,0,0,0.1);
+  ">
 
-Click to reset: https://schedulo-app-theta.vercel.app/reset-password
+    <div style="text-align:center; margin-bottom:20px;">
+      <h2 style="color:#4e46e5; font-size:26px; margin:0;">🔐 Password Reset Request</h2>
+      <p style="color:#555; font-size:15px; margin-top:8px;">Your OTP code is ready</p>
+    </div>
 
-If you didn’t request this, ignore this email.
+    <p style="color:#333; font-size:16px;">Hi <strong>${user.name}</strong>,</p>
 
-— The Schedulo Team
-            `;
+    <p style="color:#444; font-size:15px; line-height:1.7;">
+      You requested to reset your Schedulo account password.  
+      Use the OTP below to continue:
+    </p>
 
-            await sendEmail(email, subject, text);
+    <div style="
+      background:#eef2ff;
+      padding:20px;
+      text-align:center;
+      border-radius:10px;
+      margin:25px 0;
+      border-left:4px solid #4e46e5;
+    ">
+      <div style="font-size:32px; font-weight:bold; color:#4e46e5; letter-spacing:4px;">
+        ${otp}
+      </div>
+      <p style="color:#666; margin-top:10px; font-size:14px;">This OTP expires in <strong>5 minutes</strong>.</p>
+    </div>
+
+    <div style="text-align:center; margin:25px 0;">
+      <a href="https://schedulo-app-theta.vercel.app/reset-password"
+        style="
+          background:#4e46e5;
+          padding:12px 28px;
+          color:#ffffff;
+          font-size:16px;
+          text-decoration:none;
+          border-radius:6px;
+          display:inline-block;
+        ">
+        Reset Password
+      </a>
+    </div>
+
+    <p style="color:#444; font-size:15px; line-height:1.7;">
+      If you did not request this password reset, please ignore this message.  
+      Your account is safe.
+    </p>
+
+    <p style="color:#666; font-size:13px; text-align:center; margin-top:18px;">
+      — The Schedulo Team
+    </p>
+
+  </div>
+
+  <p style="text-align:center; color:#999; font-size:12px; margin-top:16px;">
+    This is an automated email. Please do not reply.
+  </p>
+</div>
+            `.trim();
+
+            await sendEmail(email, subject, html);
+
             res.status(200).json({ message: 'OTP sent to email' });
 
         } catch (err) {
@@ -187,6 +307,7 @@ If you didn’t request this, ignore this email.
         }
     }
 ];
+
 
 // ===== VERIFY OTP =====
 exports.verifyOtp = [
