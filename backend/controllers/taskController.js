@@ -52,7 +52,7 @@ const updateTask = async (req, res) => {
         const { title, description, priority } = req.body;
         const updatedTask = await Task.findOneAndUpdate(
             { _id: req.params.id, userId: req.userId },
-            { title, description, priority },
+            { title, description, priority},
             { new: true }
         );
         if (!updatedTask) {
