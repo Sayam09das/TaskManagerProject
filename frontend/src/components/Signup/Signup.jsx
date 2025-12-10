@@ -146,10 +146,11 @@ const Signup = () => {
 
                 if (loginRes.ok) {
                     showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => (window.location.href = '/auth/login'), 1500);
+                    setTimeout(() => navigate('/login'), 1500);
                 } else {
                     showToast(loginData.message || 'Login after signup failed', 'error');
                 }
+
             }
 
             else {
