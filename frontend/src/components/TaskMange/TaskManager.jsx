@@ -142,7 +142,7 @@ const TaskManager = () => {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
-            await axios.post('http://localhost:3000/auth/logout', {}, {
+            await axios.post(`${BACKEND_URL}/auth/logout`, {}, {
                 withCredentials: true,
             });
             showToast('Logged out successfully!', 'success');
@@ -159,7 +159,7 @@ const TaskManager = () => {
     const toggleTaskStatus = async (taskId) => {
         try {
             const response = await axios.put(
-                `http://localhost:3000/api/task/toggle-status/${taskId}`,
+                `${BACKEND_URL}/api/task/toggle-status/${taskId}`,
                 {},
                 { withCredentials: true }
             );
