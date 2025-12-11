@@ -146,10 +146,15 @@ const TaskManager = () => {
             await axios.post(`${BACKEND_URL}/auth/logout`, {}, {
                 withCredentials: true,
             });
+
+            // remove possible fallback token
+            localStorage.removeItem("authToken");
+
             showToast('Logged out successfully!', 'success');
+
             setTimeout(() => {
                 navigate('/');
-            }, 1000);
+            }, 500);
         } catch (error) {
             console.error('Logout failed:', error);
             showToast('Logout failed. Please try again.', 'error');
@@ -157,6 +162,7 @@ const TaskManager = () => {
             setIsLoggingOut(false);
         }
     };
+
     const toggleTaskStatus = async (taskId) => {
         try {
             const response = await axios.put(

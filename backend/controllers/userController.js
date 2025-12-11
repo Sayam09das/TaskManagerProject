@@ -200,10 +200,13 @@ exports.loginUser = [
 
 exports.logoutUser = async (req, res) => {
     try {
+        const isProd = process.env.NODE_ENV === 'production';
+
         res.clearCookie("authToken", {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            secure: isProd,     // must match login cookie
+            sameSite: 'None',   // must match login cookie
+            path: '/'           // highly recommended to include
         });
 
         res.status(200).json({ message: "Logged out successfully" });
