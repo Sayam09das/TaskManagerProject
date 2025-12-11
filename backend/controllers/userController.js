@@ -12,9 +12,22 @@ const generateOtp = () => crypto.randomInt(100000, 999999).toString();
 
 // ===== LOGIN RATE LIMITER (5 attempts every 15 minutes) =====
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: 'Too many login attempts, please try again later.',
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5,                   // limit each IP to 5 requests per windowMs
+    standardHeaders: true,    // Return RateLimit-* headers
+    legacyHeaders: false,     // Disable the deprecated X-RateLimit-* headers
+    handler: (req, res /*, next */) => {
+        // prefer to set Retry-After in seconds (ceil of remaining window)
+        const retryAfterSeconds = Math.ceil((req.rateLimit && req.rateLimit.resetTime
+            ? (req.rateLimit.resetTime - Date.now()) / 1000
+            : 60)); // fallback 60s
+
+        res.set('Retry-After', String(retryAfterSeconds));
+        res.status(429).json({
+            error: 'Too many login attempts, please try again later.',
+            retryAfter: retryAfterSeconds
+        });
+    }
 });
 
 // ===== REGISTER USER =====
@@ -132,7 +145,6 @@ exports.registerUser = [
 ];
 
 
-// ===== LOGIN USER =====
 exports.loginUser = [
     loginLimiter,
     body('email').isEmail().withMessage('Email is required'),
@@ -161,23 +173,24 @@ exports.loginUser = [
                 { expiresIn: process.env.JWT_EXPIRATION || '1h' }
             );
 
-
+            // cookie settings — NOTE: secure:true will only set cookie over HTTPS
             res.cookie('authToken', token, {
                 httpOnly: true,
-                secure: true,           // ✅ Required for HTTPS (which Render uses)
-                sameSite: 'None',       // ✅ Required if frontend and backend are on different domains
+                secure: true,
+                sameSite: 'None',
                 maxAge: 3600000,
             });
 
             res.status(200).json({
-                message: `Login successful`,
+                message: 'Login successful',
                 user: {
                     email: user.email,
                     name: user.name,
                     id: user._id
-                }
+                },
+                // optionally include token for clients that need it (non-cookie flows)
+                // token
             });
-
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Server error' });

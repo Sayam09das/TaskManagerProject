@@ -38,39 +38,63 @@ const Login = () => {
         };
     };
 
+    // inside your Login component — replace the existing handleLogin
     const handleLogin = async (e) => {
         e.preventDefault();
+
+        // optional: simple client-side validation
+        if (!email || !password) {
+            showToast('Please enter both email and password', 'error');
+            return;
+        }
 
         try {
             const res = await fetch(`${BACKEND_URL}/auth/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
+                body: JSON.stringify({ email, password })
             });
 
-            let data = {};
-            try {
-                data = await res.json();
-            } catch {
-                data = {};
-            }
-
-            if (!res.ok) {
-                showToast(data.message || 'Login failed', 'error');
+            // handle 429 specifically
+            if (res.status === 429) {
+                const retryAfter = res.headers.get('Retry-After');
+                // try to read JSON, else text
+                const ct = (res.headers.get('content-type') || '').toLowerCase();
+                const body = ct.includes('application/json') ? await res.json().catch(() => null) : await res.text().catch(() => null);
+                const waitMsg = retryAfter ? `Retry after ${retryAfter} seconds.` : '';
+                const message = (body && (body.message || body.error)) || (typeof body === 'string' ? body : 'Too many requests');
+                showToast(`${message}. ${waitMsg}`, 'error');
                 return;
             }
 
-            localStorage.setItem('authToken', data.token);
-            showToast('Login successful!', 'success');
-            navigate('/schedulo'); // ✅ fixed
+            // non-OK
+            if (!res.ok) {
+                const ct = (res.headers.get('content-type') || '').toLowerCase();
+                const body = ct.includes('application/json') ? await res.json().catch(() => null) : await res.text().catch(() => null);
+                const message = (body && (body.message || body.error)) || (typeof body === 'string' ? body : `Login failed (${res.status})`);
+                showToast(message, 'error');
+                return;
+            }
+
+            // success — parse body depending on content type
+            const ct = (res.headers.get('content-type') || '').toLowerCase();
+            const data = ct.includes('application/json') ? await res.json().catch(() => null) : await res.text().catch(() => null);
+
+            // If your server sets cookie (httpOnly) you may not get token in body.
+            // If you want a token in localStorage, adapt server to return token in JSON too.
+            if (data && data.token) {
+                localStorage.setItem('authToken', data.token);
+            }
+
+            showToast((data && data.message) || 'Login successful!', 'success');
+            navigate('/schedulo');
         } catch (err) {
-            console.error(err);
-            showToast('Something went wrong!', 'error');
+            console.error('Login error:', err);
+            showToast('Something went wrong. Check console.', 'error');
         }
     };
+
 
 
     const orbColor = isDark ? 'bg-purple-500' : 'bg-blue-400';
