@@ -12,11 +12,11 @@ const generateOtp = () => crypto.randomInt(100000, 999999).toString();
 
 // ===== LOGIN RATE LIMITER (5 attempts every 15 minutes) =====
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5,                   // limit each IP to 5 requests per windowMs
+    windowMs: 1 * 60 * 1000, // 15 minutes
+    max: 100,                   // limit each IP to 5 requests per windowMs
     standardHeaders: true,    // Return RateLimit-* headers
     legacyHeaders: false,     // Disable the deprecated X-RateLimit-* headers
-    handler: (req, res /*, next */) => {
+    handler: (req, res, next) => {
         // prefer to set Retry-After in seconds (ceil of remaining window)
         const retryAfterSeconds = Math.ceil((req.rateLimit && req.rateLimit.resetTime
             ? (req.rateLimit.resetTime - Date.now()) / 1000
@@ -182,15 +182,15 @@ exports.loginUser = [
             });
 
             res.status(200).json({
-                message: 'Login successful',
+                message: "Login successful",
+                token,
                 user: {
                     email: user.email,
                     name: user.name,
                     id: user._id
-                },
-                // optionally include token for clients that need it (non-cookie flows)
-                // token
+                }
             });
+
         } catch (err) {
             console.error(err);
             res.status(500).json({ message: 'Server error' });
